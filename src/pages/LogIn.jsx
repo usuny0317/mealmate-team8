@@ -9,25 +9,27 @@ const a = () => {};
 //로그인 페이지지
 const LogIn = () => {
   return (
-    <StLoginDiv>
-      <StRightDiv>
-        <STform onSubmit={a} id='senduser'>
-          <label>
-            Email: <input type='email' placeholder='이메일 입력' />
-          </label>
-          <label>
-            Password: <input type='password' placeholder='비밀번호 입력' />
-          </label>
-          <button>로그인하기</button>
-          <br />
-          <Link to='/signup'> 회원가입하기 </Link>
-        </STform>
-      </StRightDiv>
+    <Wrapper>
+      <div className='all'>
+        <div className='left'>
+          <form className='login-form' onSubmit={a} id='senduser'>
+            <label>
+              Email: <input type='email' placeholder='이메일 입력' />
+            </label>
+            <label>
+              Password: <input type='password' placeholder='비밀번호 입력' />
+            </label>
+            <button>로그인하기</button>
+            <br />
+            <Link to='/signup'> 회원가입하기 </Link>
+          </form>
+        </div>
 
-      <StLeftDiv>
-        <StImgbox>로고 이미지</StImgbox>
-      </StLeftDiv>
-    </StLoginDiv>
+        <div className='right'>
+          <div className='img-box'>로고 이미지</div>
+        </div>
+      </div>
+    </Wrapper>
   );
 };
 
@@ -35,36 +37,38 @@ export default LogIn;
 
 //이 아래는 스타일 컴포넌트 입니다. St~ 형식으로 작성하였고, 편하게 피드백 주세요!
 //아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
-const StLoginDiv = styled.div`
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-`;
 
-const StLeftDiv = styled.div`
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 3px solid #00aaff;
-`;
+const Wrapper = styled.div`
+  .all {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+  }
+  .right {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #ffaad4;
+  }
+  .left {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #00aaff;
+  }
 
-const StRightDiv = styled.div`
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 3px solid #ffaad4;
-`;
-const STform = styled.form`
-  padding: 20px;
-  border: 2px solid black;
-  display: flex;
-  flex-direction: column;
-  font-size: 30px;
-`;
+  .img-box {
+    font-size: 32px;
+    font-weight: bold;
+  }
 
-const StImgbox = styled.div`
-  font-size: 32px;
-  font-weight: bold;
+  .login-form {
+    padding: 20px;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: column;
+    font-size: 30px;
+  }
 `;
