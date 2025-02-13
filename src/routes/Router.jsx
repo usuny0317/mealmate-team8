@@ -5,14 +5,12 @@ import SignUp from '../pages/SignUp';
 import MyPage from '../pages/MyPage';
 import Detail from '../pages/Detail';
 import PostEditor from '../pages/PostEditor';
-import { Header } from '../components/common/Header';
-import styled from 'styled-components';
+import { Layout } from '../components/common/Layout';
 
 const Router = () => {
   return (
     <BrowserRouter>
-      <Header />
-      <StRouter>
+      <Layout>
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<LogIn />} />
@@ -21,14 +19,9 @@ const Router = () => {
           <Route path='/detail' element={<Detail />} />
           <Route path='/posteditior' element={<PostEditor />} />
         </Routes>
-      </StRouter>
+      </Layout>
     </BrowserRouter>
   );
 };
-
-//Header네비바 영역에 안 덮혀지기 작성해놓은 스타일입니다.
-const StRouter = styled.div`
-  padding-top: 60px;
-`;
 
 export default Router;
