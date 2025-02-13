@@ -1,7 +1,12 @@
 export const Header = () => {
   return (
     <>
-      <div className=''>header</div>
+      <div
+        style={{ backgroundColor: 'black', color: 'white', height: '50px' }}
+        className=''
+      >
+        header
+      </div>
     </>
   );
 };
