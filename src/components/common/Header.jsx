@@ -5,7 +5,6 @@ export const Header = () => {
   const {
     colors: { primaryLight },
   } = useTheme();
-  console.log(primaryLight);
   return (
     <StHeader $primaryLight={primaryLight}>
       <header>
