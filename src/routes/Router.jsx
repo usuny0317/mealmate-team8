@@ -5,18 +5,21 @@ import SignUp from '../pages/SignUp';
 import MyPage from '../pages/MyPage';
 import Detail from '../pages/Detail';
 import PostEditor from '../pages/PostEditor';
+import { Layout } from '../components/common/Layout';
 
 const Router = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<LogIn />} />
-        <Route path='/signup' element={<SignUp />} />
-        <Route path='/mypage' element={<MyPage />} />
-        <Route path='/detail' element={<Detail />} />
-        <Route path='/posteditior' element={<PostEditor />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/login' element={<LogIn />} />
+          <Route path='/signup' element={<SignUp />} />
+          <Route path='/mypage' element={<MyPage />} />
+          <Route path='/detail' element={<Detail />} />
+          <Route path='/posteditior' element={<PostEditor />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 };
