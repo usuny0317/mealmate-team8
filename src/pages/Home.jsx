@@ -1,6 +1,14 @@
+import { useTheme } from 'styled-components';
+
 //메인 페이지
 const Home = () => {
-  return <div>Home</div>;
+  const { colors } = useTheme();
+
+  return (
+    <div style={{ color: colors.primary, background: colors.accentLight }}>
+      Home
+    </div>
+  );
 };
 
 export default Home;
