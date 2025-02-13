@@ -1,6 +1,6 @@
 //마이페이지
-const Mypage = () => {
+const MyPage = () => {
   return <div>Mypage</div>;
 };
 
-export default Mypage;
+export default MyPage;
