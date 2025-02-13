@@ -12,14 +12,16 @@ const LogIn = () => {
     <Wrapper>
       <div className='all'>
         <div className='left'>
-          <form className='login-form' onSubmit={a} id='senduser'>
-            <label>
-              Email: <input type='email' placeholder='이메일 입력' />
-            </label>
-            <label>
-              Password: <input type='password' placeholder='비밀번호 입력' />
-            </label>
-            <button>로그인하기</button>
+          <form className='login-form' onSubmit={a} id='send-user'>
+            <div className='input-group'>
+              <label>Email:</label>
+              <input type='email' placeholder='이메일 입력' />
+            </div>
+            <div className='input-group'>
+              <label>Password:</label>
+              <input type='password' placeholder='비밀번호 입력' />
+            </div>
+            <button onSubmit={a}>로그인하기</button>
             <br />
             <Link to='/signup'> 회원가입하기 </Link>
           </form>
@@ -37,7 +39,7 @@ export default LogIn;
 
 //이 아래는 스타일 컴포넌트 입니다. St~ 형식으로 작성하였고, 편하게 피드백 주세요!
 //아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
-
+//wrapper로 감쌌습니다!
 const Wrapper = styled.div`
   .all {
     display: flex;
@@ -69,6 +71,18 @@ const Wrapper = styled.div`
     border: 2px solid black;
     display: flex;
     flex-direction: column;
-    font-size: 30px;
+    font-size: 18px;
+    gap: 16px;
+  }
+  .input-group input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
   }
 `;
