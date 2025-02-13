@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+//supabase에 연결하는 걸 진행할 생각입니다!
+//회원가입이 더 빨리 진행되어야할 것 같아서 잠시 비워두겠습니다!
+//함수 이름도 나중에 진행하며 변경하겠습니다!
 const a = () => {};
 
 //로그인 페이지지
@@ -30,6 +33,8 @@ const LogIn = () => {
 
 export default LogIn;
 
+//이 아래는 스타일 컴포넌트 입니다. St~ 형식으로 작성하였고, 편하게 피드백 주세요!
+//아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
 const StLoginDiv = styled.div`
   display: flex;
   width: 100vw;
