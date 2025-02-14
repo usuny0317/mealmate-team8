@@ -3,7 +3,7 @@ import Home from '../pages/Home';
 import LogIn from '../pages/LogIn';
 import SignUp from '../pages/SignUp';
 import MyPage from '../pages/MyPage';
-
+import Detail from '../pages/Detail';
 import PostEditor from '../pages/PostEditor';
 import { Layout } from '../components/common/Layout';
 import { EditProfile } from '../components/mypage/EditProfile';
@@ -23,7 +23,7 @@ const Router = () => {
             <Route path='/mypage/my-posts' element={<MyPosts />} />
             <Route path='/mypage/joined-posts' element={<JoinedPosts />} />
           </Route>
-
+          <Route path='/detail' element={<Detail />} />
           <Route path='/posteditior' element={<PostEditor />} />
         </Routes>
       </Layout>
