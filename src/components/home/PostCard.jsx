@@ -21,6 +21,9 @@ export default function PostCard({ postData }) {
   return (
     <PostCardWrapper>
       <p className='context'>
+        {/* TODO:
+          로그인 user정보 받아온 다음 user에 대한 profile 받아서 img에 넣어주기 
+        */}
         <img
           className='profile'
           onClick={moveToMyPage}
@@ -28,7 +31,7 @@ export default function PostCard({ postData }) {
           src='https://contents.creators.mypetlife.co.kr/content/uploads/2020/03/20175706/202003202Faf7a5a92a45c71f76391883a3e3ac572.jpg'
           alt='user_profile'
         />
-        <span>글쓴이</span>
+        <span>{postData.author_name}</span>
       </p>
       <div className='cardContent' onClick={() => moveToDetail(postData.id)}>
         <p className='smallText'>
@@ -55,10 +58,11 @@ export default function PostCard({ postData }) {
 }
 
 const PostCardWrapper = styled.section`
-  flex: 1 1 400px;
-  max-width: 400px;
+  flex: 1 1 300px;
+  max-width: 300px;
+  box-sizing: border-box;
   padding: 15px;
-  height: 400px;
+  height: 450px;
   border-radius: 5px;
   box-shadow: 1px 2px 1px #eaeaea;
   border: 1px solid ${({ theme }) => theme.colors.bgDark};

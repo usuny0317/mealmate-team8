@@ -6,9 +6,12 @@ import Empty from '../components/common/Empty';
 import { ALERT_TYPE } from '../constants/alertConstant';
 import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
+import { ImSpoonKnife } from 'react-icons/im';
+import { useNavigate } from 'react-router-dom';
 const { ERROR } = ALERT_TYPE;
 //메인 페이지
 const Home = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   useEffect(() => {
     const errorAlert = alert();
@@ -23,10 +26,20 @@ const Home = () => {
 
     getPosts();
   }, []);
+  const moveToPostBoard = () => {
+    navigate('/posteditior');
+  };
   return (
     <StHomeWrapper>
       <article id='home'>
         <SearchField />
+        <div id='postButtonField'>
+          <button onClick={moveToPostBoard}>
+            <ImSpoonKnife className='buttonIcon' size={18} />
+            Meal Mate 구하러 가기
+          </button>
+        </div>
+
         {posts.length === 0 ? (
           <Empty />
         ) : (
@@ -58,5 +71,25 @@ const StHomeWrapper = styled.div`
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+  }
+  #postButtonField {
+    text-align: center;
+    margin-bottom: 4vh;
+  }
+  button {
+    vertical-align: middle;
+    padding: 10px;
+    width: 30%;
+    min-width: 300px;
+    background-color: ${(props) => props.theme.colors.primaryLight};
+    border: none;
+    color: #fff;
+    box-shadow: 1px 2px 1px #eaeaea;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .buttonIcon {
+    margin-right: 10px;
   }
 `;
