@@ -3,8 +3,8 @@ import SearchField from '../components/home/SearchField';
 import PostCard from '../components/home/PostCard';
 import { useEffect, useState } from 'react';
 import Empty from '../components/common/Empty';
-import { supabase } from '../supabase/client';
 import { ALERT_TYPE } from '../constants/alertConstant';
+import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
 const { ERROR } = ALERT_TYPE;
 //메인 페이지
