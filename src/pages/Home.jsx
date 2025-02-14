@@ -9,10 +9,11 @@ import { alert } from '../utils/alert';
 import { ImSpoonKnife } from 'react-icons/im';
 import { useNavigate } from 'react-router-dom';
 const { ERROR } = ALERT_TYPE;
-//메인 페이지
+
 const Home = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+
   useEffect(() => {
     const errorAlert = alert();
     const getPosts = async () => {
@@ -23,12 +24,13 @@ const Home = () => {
       }
       setPosts(data);
     };
-
     getPosts();
   }, []);
+
   const moveToPostBoard = () => {
     navigate('/posteditior');
   };
+
   return (
     <StHomeWrapper>
       <article id='home'>
@@ -57,7 +59,7 @@ const Home = () => {
 export default Home;
 const StHomeWrapper = styled.div`
   #home {
-    padding-top: 10vh;
+    padding: 10vh 0;
     width: 80vw;
     margin: 0 auto;
     min-width: 300px;

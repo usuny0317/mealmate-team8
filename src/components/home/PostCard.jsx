@@ -1,39 +1,49 @@
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { supabase } from '../../supabase/client';
 
-export default function PostCard({ postData }) {
+function PostCard({ postData }) {
+  const [userInfo, setUserInfo] = useState({});
   const navigate = useNavigate();
-  useEffect(() => {
-    //TODO:
-    // 1. 해당 유저의 id값으로 user 정보 받아오기
-    // 2. 받아온 유저 정보의 nickname, profile로 글쓴이 세팅해주기
-  }, []);
 
-  const moveToDetail = (id) => {
-    navigate(`/detail?id=${id}`);
-  };
-  const moveToMyPage = () => {
-    navigate('/mypage');
-  };
+  // @TODO:
+  // 게시글 개수만큼 서버를 찔러오는 문제가 있어서 해결할 수 있는지 좀 더 고민해봐야 함
+
+  useEffect(() => {
+    const getPostOwner = async (userNickname) => {
+      const { data, error } = await supabase
+        .from('users')
+        .select()
+        .eq('nick_name', userNickname)
+        .single();
+      if (error) {
+        alert({ type: 'error' })();
+        throw error;
+      }
+      setUserInfo(data);
+    };
+    getPostOwner(postData.author_name);
+  }, [postData.author_name]);
 
   return (
     <PostCardWrapper>
       <p className='context'>
-        {/* TODO:
-          로그인 user정보 받아온 다음 user에 대한 profile 받아서 img에 넣어주기 
-        */}
         <img
           className='profile'
-          onClick={moveToMyPage}
-          width='50px'
-          src='https://contents.creators.mypetlife.co.kr/content/uploads/2020/03/20175706/202003202Faf7a5a92a45c71f76391883a3e3ac572.jpg'
+          onClick={() => navigate('/mapage')}
+          width='40px'
+          height='40px'
+          src={userInfo.profile}
           alt='user_profile'
         />
         <span>{postData.author_name}</span>
       </p>
-      <div className='cardContent' onClick={() => moveToDetail(postData.id)}>
+      <div
+        className='cardContent'
+        onClick={() => navigate(`detail?id=${postData.id}`)}
+      >
         <p className='smallText'>
           작성시간 : {dayjs(postData.created_at).format('YYYY-MM-DD HH:mm')}
         </p>
@@ -56,6 +66,8 @@ export default function PostCard({ postData }) {
     </PostCardWrapper>
   );
 }
+
+export default React.memo(PostCard);
 
 const PostCardWrapper = styled.section`
   flex: 1 1 300px;
