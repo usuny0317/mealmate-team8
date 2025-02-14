@@ -1,6 +1,6 @@
 //마이페이지
 const MyPage = () => {
-  return <div>Mypage</div>;
+  return <></>;
 };
 
 export default MyPage;
