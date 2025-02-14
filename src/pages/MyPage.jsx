@@ -1,22 +1,46 @@
 import styled from 'styled-components';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 //마이페이지
 const MyPage = () => {
+  //현재있는 페이지를 기준으로 폰트두깨가 변경됩니다
+  const currentLocation = useLocation().pathname.slice(8);
+  let editFontWeight = 200;
+  let myPostsFontWeight = 200;
+  let joinPostFontWeight = 200;
+  if (currentLocation === 'edit-profile') editFontWeight = 1000;
+  if (currentLocation === 'my-posts') myPostsFontWeight = 1000;
+  if (currentLocation === 'joined-posts') joinPostFontWeight = 1000;
+
   return (
     <StMypage>
       <div>
         <div className='sidebar'>
           <ul>
-            <Link to='/mypage/edit-profile'>
-              <li>프로필수정</li>
-            </Link>
-            <Link to='/mypage/my-posts'>
-              <li>내가쓴게시물</li>
-            </Link>
-            <Link to='/mypage/joined-posts'>
-              <li>참여한게시물</li>
-            </Link>
+            <li>
+              <Link
+                to='/mypage/edit-profile'
+                style={{ fontWeight: editFontWeight }}
+              >
+                프로필수정
+              </Link>
+            </li>
+            <li>
+              <Link
+                to='/mypage/my-posts'
+                style={{ fontWeight: myPostsFontWeight }}
+              >
+                내가쓴게시물
+              </Link>
+            </li>
+            <li>
+              <Link
+                to='/mypage/joined-posts'
+                style={{ fontWeight: joinPostFontWeight }}
+              >
+                참여한게시물
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
@@ -32,6 +56,12 @@ const MyPage = () => {
 //https://mini-frontend.tistory.com/4
 
 const StMypage = styled.div`
+  a {
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+    cursor: pointer;
+  }
   display: flex;
   .sidebar {
     margin: 10% 0;
