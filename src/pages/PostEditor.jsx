@@ -28,6 +28,23 @@ const PostEditor = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault(); // 기본 폼 제출 동작을 방지
+
+    // 유효성 검증
+    if (!title || !content || !date || !location) {
+      alert('모든 필드를 채워주세요!');
+      return;
+    }
+
+    if (numberOfPeople < 1) {
+      alert('모집인원은 1명 이상이어야 합니다.');
+      return;
+    }
+
+    if (new Date(date) < new Date()) {
+      alert('날짜는 현재 시간 이후여야 합니다.');
+      return;
+    }
+
     // 폼 데이터 확인 (콘솔에 출력)
     console.log('제목:', title);
     console.log('내용:', content);
@@ -36,6 +53,13 @@ const PostEditor = () => {
     console.log('장소:', location);
     console.log('파일:', file);
   };
+
+  function preventLeadingZero(input) {
+    // 첫 번째 문자가 "0"이고 그 뒤에 다른 숫자가 있으면 "0" 제거
+    if (input.value && input.value[0] === '0') {
+      input.value = input.value.replace(/^0+(?=\d)/, ''); // 첫 번째 "0" 이후에 다른 숫자가 올 경우 "0"을 제거
+    }
+  }
 
   return (
     <Root>
@@ -77,6 +101,7 @@ const PostEditor = () => {
                 value={numberOfPeople} // 모집인원 입력값은 numberOfPeople 상태
                 onChange={handleNumberOfPeopleChange} // 변경 시 상태 업데이트
                 required // 필수 입력 필드로 설정
+                onInput={(event) => preventLeadingZero(event.target)} //0이 중복되면 0을 제거
               />
             </StLabel>
           </InputRow>
