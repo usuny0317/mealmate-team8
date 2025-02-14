@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { main_select, get_sub_select } from '../constants/signUpSelector';
+import { supabase } from '../supabase/client';
 
 //회원가입페이지지
 const Signup = () => {
@@ -25,6 +26,7 @@ const Signup = () => {
   //완료 후 로그인으로 보내 줄 navigate
   const navigate = useNavigate();
 
+  //1. select Box useEffect
   useEffect(() => {
     //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
     if (main_location) {
@@ -35,33 +37,50 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    //회원가입을 하려니까 규칙이 있었다는 것 같아요.
+    //유효성 검사를 추가했습니다.
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 입력해 주세요.');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('비밀번호는 최소 6자 이상이어야 합니다.');
+      return;
+    }
+
     //아래는 수파 베이스 값 올려주시면 시도할 것.
     try {
       //수파 베이스 연결 시도하기기
-      //추가 데이터 보내기
-      //서버에서 auth 값(이메일, 비밀번호)을 받아오기
-      /* const {data: authData, err: authErr}=await supabase.auth.signUp({
+      // 데이터 보내기
+      // 이메일 비밀번호로 회원가입!!
+      const { data: authData, error: authErr } = await supabase.auth.signUp({
         email,
         password,
-      }); 
-      
-       if (authError) throw authError;
+      });
 
-        const { error: userError } = await supabase
-        .from("users")
-        .insert({ id: authData.user.id, nick_name: nickname, gender: gender, ... 이어 작성할 것것  });
-      // 위의 방식이 맞는 지 아직 모름!
+      if (authErr) throw authErr;
+      //정보가 없는 경우도 추가했습니다.
+      if (!authData || !authData.user) {
+        throw new Error('회원가입 실패: 유저 정보가 없습니다.');
+      }
+
+      const { error: userErr } = await supabase.from('users').insert({
+        id: authData.user.id,
+        nick_name: nickname,
+        gender,
+        main_location,
+        sub_location,
+        profile,
+      });
+      if (userErr) throw userErr;
 
       //다혜님 alert로 바꾸기기
-       alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-      navigate("/login");
+      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+      navigate('/login');
     } catch (error) {
       alert(error.message);
-      console.error("회원가입 오류:", error);
-    }
-      */
-    } catch (err) {
-      console.log(err);
+      console.error('회원가입 오류:', error);
     }
   };
 
