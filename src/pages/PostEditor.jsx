@@ -147,7 +147,7 @@ const PostEditor = () => {
 
           <ButtonGroup>
             <StButton type='submit'>작성 완료</StButton>
-            <Link to={'/Home'}>
+            <Link to={'/'}>
               <StButton type='button' className='cancel'>
                 취소하기
               </StButton>
