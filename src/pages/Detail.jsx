@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "../supabase/client.js.local";
 import styled from "styled-components";
+import dayjs from "dayjs";
 
 export const Detail = () => {
   const [post, setPost] = useState(null);
@@ -37,7 +38,7 @@ export const Detail = () => {
       <ArticleContainer>
         <Title>{post.post_title}</Title>
         <AuthorInfo>
-          작성자: {post.author_name} · {new Date(post.post_date).toLocaleDateString()}
+          작성자: {post.author_name} · {dayjs(post.post_date).format("YYYY년 MM월 DD일")}
         </AuthorInfo>
 
         {post.post_img_url && (
@@ -50,6 +51,8 @@ export const Detail = () => {
 
         <ExtraInfo>
           <p>❗️ 위치: {post.post_location}</p>
+          <p>📅 날짜: {dayjs(post.post_date).format("YYYY년 MM월 DD일")}</p>
+          <p>⏱️ 시간: {dayjs(post.post_date).format("HH시 mm분")}</p>
           <p>👍 모집 인원수: {post.post_rec_cnt}</p>
         </ExtraInfo>
       </ArticleContainer>
