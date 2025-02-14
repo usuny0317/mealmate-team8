@@ -12,10 +12,10 @@ export default function SearchField() {
 }
 
 const StSearchFieldWrapper = styled.div`
-  /* background-color: skyblue; */
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-bottom: 8vh;
   .inputBox {
     background-color: #fff;
     border: 1px solid ${({ theme }) => theme.colors.bgDark};
@@ -24,6 +24,9 @@ const StSearchFieldWrapper = styled.div`
     align-items: center;
     border-radius: 5px;
     box-shadow: 1px 2px 1px #eaeaea;
+    @media screen and (max-width: 500px) {
+      width: 100%;
+    }
   }
   .inputBox > input {
     width: calc(100% - 22px);
