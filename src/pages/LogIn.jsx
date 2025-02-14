@@ -22,8 +22,11 @@ const LogIn = () => {
               <input type='password' placeholder='비밀번호 입력' />
             </div>
             <button onSubmit={a}>로그인하기</button>
-            <br />
-            <Link to='/signup'> 회원가입하기 </Link>
+            <button>
+              <Link to='/signup' className='sign-up'>
+                회원가입하기
+              </Link>
+            </button>
           </form>
         </div>
 
@@ -84,5 +87,9 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 20px;
+  }
+
+  .sign-up {
+    text-decoration-line: none;
   }
 `;
