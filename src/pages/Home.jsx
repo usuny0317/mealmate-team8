@@ -1,37 +1,26 @@
-import { ALERT_TYPE } from '../constants/alertConstant';
-import { alert } from '../utils/alert';
+import styled from 'styled-components';
+import SearchField from '../components/home/SearchField';
 
 //메인 페이지
 const Home = () => {
-  const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
-  const successAlert = alert();
-  const errorAlert = alert();
-  const warningAlert = alert();
-
   return (
-    <div>
-      Home
-      <button
-        onClick={() => successAlert({ type: SUCCESS, content: 'ㅊㅋㅊㅋ' })}
-      >
-        성공
-      </button>
-      <button
-        onClick={() =>
-          errorAlert({ type: ERROR, content: 'ㄴㄴ', buttonText: '닫기' })
-        }
-      >
-        실패
-      </button>
-      <button
-        onClick={() =>
-          warningAlert({ type: WARNING, content: '~를 삭제하시겠습니까?' })
-        }
-      >
-        경고
-      </button>
-    </div>
+    <StHomeWrapper>
+      <article id='home'>
+        <SearchField />
+      </article>
+    </StHomeWrapper>
   );
 };
 
 export default Home;
+const StHomeWrapper = styled.div`
+  #home {
+    padding-top: 10vh;
+    /* height: 100vh; */
+    width: 80vw;
+    margin: 0 auto;
+    min-width: 300px;
+    max-width: 1440px;
+    /* background-color: pink; */
+  }
+`;
