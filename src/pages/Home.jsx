@@ -12,8 +12,9 @@ const { ERROR } = ALERT_TYPE;
 
 const Home = () => {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // 서버에서 받아온 게시글 리스트
 
+  // 메인 페이지 진입 시 서버에서 모든 post 데이터 요청
   useEffect(() => {
     const errorAlert = alert();
     const getPosts = async () => {
@@ -27,6 +28,7 @@ const Home = () => {
     getPosts();
   }, []);
 
+  // 게시글 등록 페이지로 이동
   const moveToPostBoard = () => {
     navigate('/posteditior');
   };

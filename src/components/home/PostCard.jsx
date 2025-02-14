@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { supabase } from '../../supabase/client';
 
 function PostCard({ postData }) {
-  const [userInfo, setUserInfo] = useState({});
+  const [userInfo, setUserInfo] = useState({}); // 게시글을 쓴 user의 정보
   const navigate = useNavigate();
 
   // @TODO:
@@ -16,7 +16,7 @@ function PostCard({ postData }) {
       const { data, error } = await supabase
         .from('users')
         .select()
-        .eq('nick_name', userNickname)
+        .eq('nick_name', userNickname) //게시글을 쓴 user의 정보를 받아옴
         .single();
       if (error) {
         alert({ type: 'error' })();
@@ -24,15 +24,24 @@ function PostCard({ postData }) {
       }
       setUserInfo(data);
     };
+
     getPostOwner(postData.author_name);
   }, [postData.author_name]);
+
+  const moveToMyPage = () => {
+    navigate('/mypage');
+  };
+
+  const moveToDetail = (targetId) => {
+    navigate(`detail?id=${targetId}`);
+  };
 
   return (
     <PostCardWrapper>
       <p className='context'>
         <img
           className='profile'
-          onClick={() => navigate('/mapage')}
+          onClick={() => moveToMyPage()}
           width='40px'
           height='40px'
           src={userInfo.profile}
@@ -40,10 +49,7 @@ function PostCard({ postData }) {
         />
         <span>{postData.author_name}</span>
       </p>
-      <div
-        className='cardContent'
-        onClick={() => navigate(`detail?id=${postData.id}`)}
-      >
+      <div className='cardContent' onClick={() => moveToDetail(postData.id)}>
         <p className='smallText'>
           작성시간 : {dayjs(postData.created_at).format('YYYY-MM-DD HH:mm')}
         </p>
@@ -98,7 +104,6 @@ const PostCardWrapper = styled.section`
       object-fit: cover;
     }
   }
-
   h4 {
     font-weight: bold;
     font-size: 1.2rem;
