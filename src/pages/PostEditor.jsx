@@ -1,10 +1,10 @@
 import styled from 'styled-components';
-import { Header } from '../components/common/Header';
+import { Layout } from '../components/common/Layout';
 
 const PostEditor = () => {
   return (
     <Root>
-      <Header />
+      <Layout />
       <StTitleContainer>
         <h2>게시글 작성</h2>
       </StTitleContainer>
@@ -72,7 +72,6 @@ const Root = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 70px;
   box-sizing: border-box;
 `;
 
