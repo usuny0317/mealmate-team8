@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { Layout } from '../components/common/Layout';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const PostEditor = () => {
   const [title, setTitle] = useState(''); // 제목 상태
@@ -39,7 +39,6 @@ const PostEditor = () => {
 
   return (
     <Root>
-      <Layout />
       <StTitleContainer>
         <h2>게시글 작성</h2>
       </StTitleContainer>
@@ -94,7 +93,7 @@ const PostEditor = () => {
           </StLabel>
 
           <InputRow>
-            <StLabel className='half-width'>
+            <StLabelPlace className='half-width'>
               장소
               <StInput
                 type='text'
@@ -103,7 +102,7 @@ const PostEditor = () => {
                 onChange={handleLocationChange} // 변경 시 상태 업데이트
                 required // 필수 입력 필드로 설정
               />
-            </StLabel>
+            </StLabelPlace>
             <StLabel className='half-width'>
               이미지 추가
               <StInput
@@ -123,9 +122,11 @@ const PostEditor = () => {
 
           <ButtonGroup>
             <StButton type='submit'>작성 완료</StButton>
-            <StButton type='button' className='cancel'>
-              취소하기
-            </StButton>
+            <Link to={'/Home'}>
+              <StButton type='button' className='cancel'>
+                취소하기
+              </StButton>
+            </Link>
           </ButtonGroup>
         </StPostForm>
       </StEditorWrapper>
@@ -136,13 +137,14 @@ const PostEditor = () => {
 // Styled Components
 const Root = styled.div`
   width: 100%;
-  overflow: hidden;
+  overflow: hidden; /* 세로 스크롤 숨기기 */
   background: #f5f7fb;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  padding: 0; /* 불필요한 여백 제거 */
 `;
 
 const StTitleContainer = styled.div`
@@ -245,6 +247,22 @@ const StInput = styled.input`
   @media (max-width: 480px) {
     padding: 0.65rem;
     font-size: 0.875rem;
+  }
+`;
+
+const StLabelPlace = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2d3748;
+
+  &.half-width {
+    flex: 1;
+    min-width: 280px;
+
+    @media (max-width: 600px) {
+      min-width: 100%;
+    }
   }
 `;
 
