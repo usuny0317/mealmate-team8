@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -30,7 +31,9 @@ export default function PostCard({ postData }) {
         <span>글쓴이</span>
       </p>
       <div className='cardContent' onClick={() => moveToDetail(postData.id)}>
-        <p className='smallText'>작성시간 : {postData.created_at}</p>
+        <p className='smallText'>
+          작성시간 : {dayjs(postData.created_at).format('YYYY-MM-DD HH:mm')}
+        </p>
         <p className='postImage'>
           <img
             width='100%'
@@ -42,7 +45,9 @@ export default function PostCard({ postData }) {
 
         <h4>{postData.post_title}</h4>
         <p className='context'>{postData.post_location}</p>
-        <p className='context'>{postData.meeting_date}</p>
+        <p className='context'>
+          {dayjs(postData.meeting_date).format('YYYY-MM-DD HH:ss')}
+        </p>
         <p className='context'>n명/{postData.post_rec_cnt}</p>
       </div>
     </PostCardWrapper>
