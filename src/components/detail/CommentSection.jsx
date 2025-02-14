@@ -1,7 +1,10 @@
-const CommentSection = () => {
+export const CommentSection = () => {
 
     return(
-        <div> 댓글창</div>
+        <div> 
+           <p>댓글창</p>
+           <input></input>
+           
+        </div>
     )
 }
-export default CommentSection

@@ -3,7 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase/client.js';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import DetailAction from '../components/detail/DetailAction';
+import {DetailAction} from '../components/detail/DetailAction';
+import { CommentSection } from '../components/detail/CommentSection.jsx';
+import {alert} from "../utils/alert.js"
+import { ALERT_TYPE } from '../constants/alertConstant';
 
 export const Detail = () => {
   // 게시글 데이터 상태
@@ -21,51 +24,60 @@ export const Detail = () => {
           .eq('id', postId)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
         setPost(data);
       } catch (error) {
+        // 에러 발생시 스왈을 이용하여 에러 표시
+        alert()({
+          type: ALERT_TYPE.ERROR,
+          content: '게시글을 불러오는 중 오류가 발생했습니다.',
+        });
         console.error('데이터 가져오기 오류:', error);
       }
     };
 
-    if (postId) fetchPost();
+    if (postId) {
+      fetchPost();
+    }
   }, [postId]);
 
-  // 데이터 로딩 중 표시
   if (!post) {
     return <p>게시글을 불러오는 중...</p>;
   }
-
   // 게시글 화면 렌더링
   return (
-    <PageContainer>
-      <ArticleContainer>
-        <Title>{post.post_title}</Title>
-        <AuthorInfo>
+    <StPageContainer>
+      <StArticleContainer>
+        <StTitle>{post.post_title}</StTitle>
+        <StAuthorInfo>
           작성자: {post.author_name} · {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}
-        </AuthorInfo>
+        </StAuthorInfo>
         {post.post_img_url && (
-          <ImageContainer>
+          <StImageContainer>
             <img src={post.post_img_url} alt='게시글 이미지' />
-          </ImageContainer>
+          </StImageContainer>
         )}
-        <Content>{post.post_content}</Content>
-        <ExtraInfo>
+        <StContent>{post.post_content}</StContent>
+        <StExtraInfo>
           <p>❗️ 위치: {post.post_location}</p>
-          <p>⏱️ 시간: {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}</p>
+          <p>📅 날짜: {dayjs(post.post_date).format('YYYY년 MM월 DD일')}</p>
+          <p>⏱️ 시간: {dayjs(post.post_date).format('HH시 mm분')}</p>
           <p>👍 모집 인원수: {post.post_rec_cnt}</p>
-        </ExtraInfo>
+        </StExtraInfo>
         {/* 함께해요 버튼 */}
         <DetailAction postId={postId} userId={'사용자_아이디_여기'} />
-      </ArticleContainer>
-    </PageContainer>
+        <CommentSection></CommentSection>
+      </StArticleContainer>
+    </StPageContainer>
   );
 };
 
 export default Detail;
 
 // Styled-components
-const PageContainer = styled.div`
+const StPageContainer = styled.div`
   width: 100vw;
   min-height: 100vh;
   background: #f7f7f7;
@@ -74,7 +86,7 @@ const PageContainer = styled.div`
   padding: 10px;
 `;
 
-const ArticleContainer = styled.div`
+const StArticleContainer = styled.div`
   width: 100%;
   max-width: 1200px;
   background: #fff;
@@ -84,20 +96,20 @@ const ArticleContainer = styled.div`
   line-height: 1.8;
 `;
 
-const Title = styled.h1`
+const StTitle = styled.h1`
   font-size: 32px;
   font-weight: bold;
   color: #333;
   margin-bottom: 20px;
 `;
 
-const AuthorInfo = styled.p`
+const StAuthorInfo = styled.p`
   font-size: 16px;
   color: #777;
   margin-bottom: 20px;
 `;
 
-const ImageContainer = styled.div`
+const StImageContainer = styled.div`
   width: 100%;
   overflow: hidden;
   border-radius: 6px;
@@ -110,13 +122,13 @@ const ImageContainer = styled.div`
   }
 `;
 
-const Content = styled.p`
+const StContent = styled.p`
   font-size: 20px;
   color: #444;
   margin-bottom: 20px;
 `;
 
-const ExtraInfo = styled.div`
+const StExtraInfo = styled.div`
   font-size: 18px;
   color: #555;
   background: #fff3f3;

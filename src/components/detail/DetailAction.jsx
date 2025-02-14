@@ -95,4 +95,3 @@ const LikeCount = styled.span`
   font-weight: bold;
 `;
 
-export default DetailAction;
