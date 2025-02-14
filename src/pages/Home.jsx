@@ -3,14 +3,25 @@ import SearchField from '../components/home/SearchField';
 import PostCard from '../components/home/PostCard';
 import { useEffect, useState } from 'react';
 import Empty from '../components/common/Empty';
-
+import { supabase } from '../supabase/client';
+import { ALERT_TYPE } from '../constants/alertConstant';
+import { alert } from '../utils/alert';
+const { ERROR } = ALERT_TYPE;
 //메인 페이지
 const Home = () => {
-  const [posts] = useState([]); //TODO: 데이터 연결할 때 setPosts 추가하기
+  const [posts, setPosts] = useState([]);
   useEffect(() => {
-    //TODO:
-    // post data 받아와서 뿌려주기
-    // setPost(받아온데이터)~
+    const errorAlert = alert();
+    const getPosts = async () => {
+      const { data, error } = await supabase.from('posts').select('*');
+      if (error) {
+        errorAlert({ type: ERROR, content: '오류가 발생했습니다.' });
+        throw error;
+      }
+      setPosts(data);
+    };
+
+    getPosts();
   }, []);
   return (
     <StHomeWrapper>
