@@ -1,24 +1,25 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { supabase } from "../supabase/client.js.local";
-import styled from "styled-components";
-import dayjs from "dayjs";
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../supabase/client.js';
+import styled from 'styled-components';
+import dayjs from 'dayjs';
+import DetailAction from '../components/detail/DetailAction';
 
 export const Detail = () => {
   const [post, setPost] = useState(null);
   const [searchParams] = useSearchParams();
-  const postId = searchParams.get("id");
+  const postId = searchParams.get('id');
 
   useEffect(() => {
     const fetchPost = async () => {
       const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", postId)
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
         .single();
 
       if (error) {
-        console.error("데이터 가져오기 오류:", error);
+        console.error('데이터 가져오기 오류:', error);
       } else {
         setPost(data);
       }
@@ -38,12 +39,13 @@ export const Detail = () => {
       <ArticleContainer>
         <Title>{post.post_title}</Title>
         <AuthorInfo>
-          작성자: {post.author_name} · {dayjs(post.post_date).format("YYYY년 MM월 DD일")}
+          작성자: {post.author_name} ·{' '}
+          {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}
         </AuthorInfo>
 
         {post.post_img_url && (
           <ImageContainer>
-            <img src={post.post_img_url} alt="게시글 이미지" />
+            <img src={post.post_img_url} alt='게시글 이미지' />
           </ImageContainer>
         )}
 
@@ -51,10 +53,16 @@ export const Detail = () => {
 
         <ExtraInfo>
           <p>❗️ 위치: {post.post_location}</p>
-          <p>📅 날짜: {dayjs(post.post_date).format("YYYY년 MM월 DD일")}</p>
-          <p>⏱️ 시간: {dayjs(post.post_date).format("HH시 mm분")}</p>
+          <p>
+            ⏱️ 시간:{' '}
+            {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}
+          </p>
           <p>👍 모집 인원수: {post.post_rec_cnt}</p>
         </ExtraInfo>
+
+        {/* 함께해요 버튼 추가 */}
+
+        <DetailAction postId={postId} userId={'사용자_아이디_여기'} />
       </ArticleContainer>
     </PageContainer>
   );
@@ -62,7 +70,6 @@ export const Detail = () => {
 
 export default Detail;
 
-// ✨ Styled-components 스타일
 const PageContainer = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -79,7 +86,7 @@ const ArticleContainer = styled.div`
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   line-height: 1.8;
 `;
 
