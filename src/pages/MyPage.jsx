@@ -5,13 +5,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 const MyPage = () => {
   //현재있는 페이지를 기준으로 폰트두깨가 변경됩니다
   const currentLocation = useLocation().pathname.slice(8);
-  let editFontWeight = 200;
-  let myPostsFontWeight = 200;
-  let joinPostFontWeight = 200;
-  if (currentLocation === 'edit-profile') editFontWeight = 1000;
-  if (currentLocation === 'my-posts') myPostsFontWeight = 1000;
-  if (currentLocation === 'joined-posts') joinPostFontWeight = 1000;
-
   return (
     <StMypage>
       <div>
@@ -19,24 +12,24 @@ const MyPage = () => {
           <ul>
             <li>
               <Link
+                className={currentLocation === 'edit-profile' ? 'active' : ''}
                 to='/mypage/edit-profile'
-                style={{ fontWeight: editFontWeight }}
               >
                 프로필수정
               </Link>
             </li>
             <li>
               <Link
+                className={currentLocation === 'my-posts' ? 'active' : ''}
                 to='/mypage/my-posts'
-                style={{ fontWeight: myPostsFontWeight }}
               >
                 내가쓴게시물
               </Link>
             </li>
             <li>
               <Link
+                className={currentLocation === 'joined-posts' ? 'active' : ''}
                 to='/mypage/joined-posts'
-                style={{ fontWeight: joinPostFontWeight }}
               >
                 참여한게시물
               </Link>
@@ -53,9 +46,10 @@ const MyPage = () => {
   );
 };
 
-//https://mini-frontend.tistory.com/4
-
 const StMypage = styled.div`
+  .active {
+    font-weight: 1000;
+  }
   a {
     text-decoration: none;
     color: inherit;
