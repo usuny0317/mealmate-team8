@@ -1,4 +1,3 @@
-//게시글 작성 및 수정페이지지
 import styled from 'styled-components';
 import { Header } from '../components/common/Header';
 
@@ -6,104 +5,231 @@ const PostEditor = () => {
   return (
     <Root>
       <Header />
+      <StTitleContainer>
+        <h2>게시글 작성</h2>
+      </StTitleContainer>
       <StEditorWrapper>
         <StPostForm>
-          <StLabel>
-            제목
-            <StInput type='text' placeholder='게시글 제목을 입력하세요' />
-          </StLabel>
+          <InputGroup>
+            <StLabel>
+              제목
+              <StInput
+                type='text'
+                placeholder='게시글 제목을 입력하세요'
+                className='title-input'
+              />
+            </StLabel>
+          </InputGroup>
+
+          <InputRow>
+            <StLabel className='half-width'>
+              날짜
+              <StInput type='datetime-local' />
+            </StLabel>
+            <StLabel className='half-width'>
+              모집인원
+              <StInput type='number' min='1' placeholder='인원수를 입력' />
+            </StLabel>
+          </InputRow>
+
           <StLabel>
             내용
-            <StTextArea placeholder='게시글 내용을 입력하세요' />
+            <StTextArea
+              placeholder='게시글 내용을 상세히 입력하세요'
+              rows={8}
+            />
           </StLabel>
-          <StLabel>
-            장소
-            <StInput type='text' placeholder='장소를 입력하세요' />
-          </StLabel>
-          <StLabel>
-            날짜
-            <StInput type='date' />
-          </StLabel>
-          <StLabel>
-            모집인원
-            <StInput type='number' />
-          </StLabel>
-          <StLabel>
-            파일 첨부
-            <StInput type='file' />
-          </StLabel>
-          <StButton type='submit'>게시글 작성</StButton>
+
+          <InputRow>
+            <StLabel className='half-width'>
+              장소
+              <StInput type='text' placeholder='모임 장소 입력' />
+            </StLabel>
+            <StLabel className='half-width'>
+              파일 첨부
+              <StInput type='file' />
+            </StLabel>
+          </InputRow>
+
+          <ButtonGroup>
+            <StButton type='submit'>작성 완료</StButton>
+            <StButton type='button' className='cancel'>
+              취소하기
+            </StButton>
+          </ButtonGroup>
         </StPostForm>
       </StEditorWrapper>
     </Root>
   );
 };
 
-export default PostEditor;
-
+// Styled Components
 const Root = styled.div`
   width: 100%;
-  height: 100vh;
+  overflow: hidden;
+  background: #f5f7fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+  box-sizing: border-box;
+`;
+
+const StTitleContainer = styled.div`
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  min-height: 80px; /* 헤더와 폼 사이 일정한 공간 유지 */
+  width: 100%;
+  text-align: center;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d3748;
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 40px;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
 `;
 
 const StEditorWrapper = styled.div`
-  height: 80%;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 20px;
-  border-radius: 8px;
+  max-width: 1400px;
+  width: calc(100% - 80px); /* 좌우 패딩 포함한 너비 */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 50px;
+  box-sizing: border-box; /* 패딩 포함하여 크기 조정 */
+
+  @media (max-width: 768px) {
+    width: calc(100% - 40px); /* 모바일에서는 좌우 여백 줄임 */
+  }
 `;
 
 const StPostForm = styled.form`
-  height: 100%;
-  width: 70%;
+  background: white;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+
+  @media (max-width: 480px) {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+`;
+
+const InputGroup = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+// InputRow 미디어쿼리 강화
+const InputRow = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid black;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const StLabel = styled.label`
-  width: 90%;
-  margin-bottom: 10px;
-  font-weight: bold;
-  display: flex;
-  flex-direction: column;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2d3748;
+
+  &.half-width {
+    flex: 1;
+    min-width: 280px; // 최소 너비 추가
+
+    @media (max-width: 600px) {
+      min-width: 100%;
+    }
+  }
 `;
 
 const StInput = styled.input`
-  padding: 10px;
-  margin-top: 5px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box; // 추가
+
+  &[type='date'] {
+    min-width: 180px; // 날짜 입력 필드 최소 너비 설정
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.65rem;
+    font-size: 0.875rem;
+  }
 `;
 
 const StTextArea = styled.textarea`
-  height: 350px;
-  padding: 10px;
-  margin-top: 5px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   resize: vertical;
+  min-height: 150px;
+  font-size: 1rem;
+  line-height: 1.5;
+
+  @media (max-width: 480px) {
+    min-height: 120px;
+    padding: 0.65rem;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+  }
 `;
 
 const StButton = styled.button`
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
+  flex: 1;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s;
 
   &:hover {
-    background-color: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  &[type='submit'] {
+    background: #4299e1;
+    color: white;
+  }
+
+  &.cancel {
+    background: #e2e8f0;
+    color: #2d3748;
   }
 `;
+
+export default PostEditor;
