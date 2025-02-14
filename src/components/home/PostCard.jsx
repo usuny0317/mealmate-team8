@@ -12,7 +12,7 @@ export default function PostCard({ postData }) {
   }, []);
 
   const moveToDetail = (id) => {
-    navigate(`/detail/${id}`);
+    navigate(`/detail?id=${id}`);
   };
   const moveToMyPage = () => {
     navigate('/mypage');
