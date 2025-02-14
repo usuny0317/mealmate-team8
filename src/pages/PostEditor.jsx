@@ -72,7 +72,7 @@ const Root = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 60px;
+  padding-top: 70px;
   box-sizing: border-box;
 `;
 
