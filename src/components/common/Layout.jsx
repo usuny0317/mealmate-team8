@@ -11,7 +11,7 @@ export const Layout = ({ children }) => {
         <header>
           <div className='header-home-area'>
             <Link to='/'>
-              <img src='mm_logo.svg' />
+              <img src='/mm_logo.svg' />
             </Link>
             <Link to='/'>
               <div className='header-title'>MealMate</div>
