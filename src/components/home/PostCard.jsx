@@ -1,32 +1,10 @@
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { supabase } from '../../supabase/client';
 
 function PostCard({ postData }) {
-  const [userInfo, setUserInfo] = useState({}); // 게시글을 쓴 user의 정보
   const navigate = useNavigate();
-
-  // @TODO:
-  // 게시글 개수만큼 서버를 찔러오는 문제가 있어서 해결할 수 있는지 좀 더 고민해봐야 함
-
-  useEffect(() => {
-    const getPostOwner = async (userNickname) => {
-      const { data, error } = await supabase
-        .from('users')
-        .select()
-        .eq('nick_name', userNickname) //게시글을 쓴 user의 정보를 받아옴
-        .single();
-      if (error) {
-        alert({ type: 'error' })();
-        throw error;
-      }
-      setUserInfo(data);
-    };
-
-    getPostOwner(postData.author_name);
-  }, [postData.author_name]);
 
   const moveToMyPage = () => {
     navigate('/mypage');
@@ -44,7 +22,7 @@ function PostCard({ postData }) {
           onClick={() => moveToMyPage()}
           width='40px'
           height='40px'
-          src={userInfo.profile}
+          src={postData.users.profile}
           alt='user_profile'
         />
         <span>{postData.author_name}</span>

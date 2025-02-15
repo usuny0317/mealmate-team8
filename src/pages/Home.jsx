@@ -18,7 +18,9 @@ const Home = () => {
   useEffect(() => {
     const errorAlert = alert();
     const getPosts = async () => {
-      const { data, error } = await supabase.from('posts').select('*');
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, users!inner(profile)'); //TODO: users객체가 전체로 오고있는데 profile만 뽑아오도록 수정할 것
       if (error) {
         errorAlert({ type: ERROR, content: '오류가 발생했습니다.' });
         throw error;
