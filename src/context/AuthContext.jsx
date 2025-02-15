@@ -14,19 +14,18 @@ export const AuthProVider = ({ children }) => {
 
   //일단 로그인을 위해 id비밀번호 문자열로 넣어두겠습니다!
   //닉네임 장현빈(님) 과 연결되어 있는 id비밀번호입니다.
-  const [supabaseRequestId, setSupabaseRequestId] = useState('pal@naver.com');
-  const [supabaseRequestPassword, setSupabaseRequestPassword] =
-    useState('1234');
+  const [userEmail, setUserEmail] = useState('pal@naver.com');
+  const [userPassword, setUserPassword] = useState('1234');
 
   useEffect(() => {
     let authUserId = '';
-    const signUp = async () => {
+    const getUserInfo = async () => {
       const {
         data: { user },
         errorSignUp,
       } = await supabase.auth.signInWithPassword({
-        email: supabaseRequestId,
-        password: supabaseRequestPassword,
+        email: userEmail,
+        password: userPassword,
       });
       if (errorSignUp) {
         errorAlert({ type: ERROR, content: '로그인실패 아이디 비밀번호 다름' });
@@ -45,7 +44,7 @@ export const AuthProVider = ({ children }) => {
       }
       setAuthUserId(data);
     };
-    signUp();
+    getUserInfo();
   }, []);
   //여기 부분은 로그인 페이지에 있는게 맞는 것 같긴합니다 일단 로그인을 위해 여기에 작성합니다~~
 
