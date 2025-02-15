@@ -33,9 +33,9 @@ const LogIn = () => {
   };
 
   return (
-    <Wrapper>
-      <div className='all'>
-        <div className='left'>
+    <StWrapper>
+      <div className='all-page'>
+        <div className='left-side'>
           <form className='login-form' id='send-user' onSubmit={Login}>
             <div className='input-group'>
               <label>
@@ -72,11 +72,11 @@ const LogIn = () => {
           </form>
         </div>
 
-        <div className='right'>
+        <div className='right-side'>
           <div className='img-box'>로고 이미지</div>
         </div>
       </div>
-    </Wrapper>
+    </StWrapper>
   );
 };
 
@@ -85,20 +85,20 @@ export default LogIn;
 //이 아래는 스타일 컴포넌트 입니다.
 //아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
 //wrapper로 감쌌습니다!
-const Wrapper = styled.div`
-  .all {
+const StWrapper = styled.div`
+  .all-page {
     display: flex;
     width: 100vw;
     height: 100vh;
   }
-  .right {
+  .right-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 3px solid #ffaad4;
   }
-  .left {
+  .left-side {
     width: 50%;
     display: flex;
     justify-content: center;
