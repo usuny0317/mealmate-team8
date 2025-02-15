@@ -6,12 +6,12 @@ import styled from 'styled-components';
 function PostCard({ postData }) {
   const navigate = useNavigate();
 
-  const moveToMyPage = () => {
-    navigate('/mypage');
+  const moveToMyPage = (targetNickname) => {
+    navigate(`/user-posts/${targetNickname}`);
   };
 
   const moveToDetail = (targetId) => {
-    navigate(`detail?id=${targetId}`);
+    navigate(`/detail?id=${targetId}`);
   };
 
   return (
@@ -19,7 +19,7 @@ function PostCard({ postData }) {
       <p className='context'>
         <img
           className='profile'
-          onClick={() => moveToMyPage()}
+          onClick={() => moveToMyPage(postData.author_name)}
           width='40px'
           height='40px'
           src={postData.users.profile}
