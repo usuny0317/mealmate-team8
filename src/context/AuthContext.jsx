@@ -5,7 +5,7 @@ import { ALERT_TYPE } from '../constants/alertConstant';
 
 const AuthContext = createContext(null);
 
-export const AuthProVider = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
 
