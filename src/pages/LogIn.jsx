@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { supabase } from '../supabase/client';
+import AuthContext from '../context/AuthContext';
 
 //로그인 페이지지
 const LogIn = () => {
-  const [userEmail, setUserEmail] = useState('');
-  const [userPassword, setUserPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { isLogin, setIsLogin, loggedInUser, setUserEmail } =
+    useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -14,12 +17,15 @@ const LogIn = () => {
     e.preventDefault();
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: userEmail,
-        password: userPassword,
+        email: email,
+        password: password,
       });
 
       if (error) throw error;
       console.log('성공! 유저 데이터:', data);
+      setIsLogin(true);
+      setUserEmail(email);
+      console.log(isLogin);
       navigate('/');
     } catch (err) {
       console.error('실패:', err.message);
@@ -37,9 +43,9 @@ const LogIn = () => {
                 <input
                   type='email'
                   placeholder='이메일 입력'
-                  value={userEmail}
+                  value={email}
                   onChange={(e) => {
-                    setUserEmail(e.target.value);
+                    setEmail(e.target.value);
                   }}
                 />
               </label>
@@ -50,9 +56,9 @@ const LogIn = () => {
                 <input
                   type='password'
                   placeholder='비밀번호 입력'
-                  value={userPassword}
+                  value={password}
                   onChange={(e) => {
-                    setUserPassword(e.target.value);
+                    setPassword(e.target.value);
                   }}
                 />
               </label>

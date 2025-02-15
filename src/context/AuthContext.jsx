@@ -49,7 +49,9 @@ export const AuthProvider = ({ children }) => {
   //여기 부분은 로그인 페이지에 있는게 맞는 것 같긴합니다 일단 로그인을 위해 여기에 작성합니다~~
 
   return (
-    <AuthContext.Provider value={{ isLogin, loggedInUser }}>
+    <AuthContext.Provider
+      value={{ isLogin, setIsLogin, loggedInUser, setUserEmail }}
+    >
       {children}
     </AuthContext.Provider>
   );
