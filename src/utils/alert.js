@@ -45,6 +45,6 @@ export const alert = () => {
   };
 
   return (alertInfo) => {
-    createAlert(alertInfo);
+    return createAlert(alertInfo);
   };
 };
