@@ -10,18 +10,16 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [gender, setGender] = useState(true);
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
   const [profile, setProfile] = useState(
     'https://www.icreta.com/files/attach/images/319/275/055/8e2c1590a474a9afb78c4cb23a9af5b2.jpg'
   );
-  //select박스에서 두번째 인자 전용입니다!
-  const [get_sub, setget_sub] = useState([]);
-
-  const [gender, setGender] = useState(true);
-
   //셀렉트 박스 전용
   const mainselect = main_select;
+  //select박스에서 두번째 인자 전용입니다!
+  const [get_sub, setget_sub] = useState([]);
 
   //완료 후 로그인으로 보내 줄 navigate
   const navigate = useNavigate();
@@ -32,7 +30,6 @@ const Signup = () => {
     if (main_location) {
       setget_sub(get_sub_select(main_location));
     }
-    setget_sub(get_sub_select(main_location));
   }, [main_location]);
 
   const handleSignup = async (e) => {
@@ -49,10 +46,8 @@ const Signup = () => {
       return;
     }
 
-    //아래는 수파 베이스 값 올려주시면 시도할 것.
+    //수파 베이스 연결 시도하기기
     try {
-      //수파 베이스 연결 시도하기기
-      // 데이터 보내기
       // 이메일 비밀번호로 회원가입!!
       const { data: authData, error: authErr } = await supabase.auth.signUp({
         email,
@@ -103,6 +98,7 @@ const Signup = () => {
           <label>
             비밀번호:{' '}
             <input
+              type='password'
               required
               placeholder='비밀번호'
               onChange={(e) => {
@@ -128,8 +124,8 @@ const Signup = () => {
                 type='radio'
                 value={true}
                 name='gender'
-                onChange={(e) => {
-                  setGender(e.target.value);
+                onChange={() => {
+                  setGender(true);
                 }}
               />
             </label>
@@ -139,8 +135,8 @@ const Signup = () => {
                 type='radio'
                 value={false}
                 name='gender'
-                onChange={(e) => {
-                  setGender(e.target.value);
+                onChange={() => {
+                  setGender(false);
                 }}
               />
             </label>
@@ -152,16 +148,25 @@ const Signup = () => {
           <label>
             지역:
             <select
+              value={main_location}
               className='main_location'
               onChange={(e) => {
-                setMain_location(e.target.value);
+                const selectedValue = e.target.value;
+                setMain_location(selectedValue);
+
+                console.log(main_location);
               }}
             >
               {mainselect.map((main) => {
-                return <option key={main}>{main}</option>;
+                return (
+                  <option value={main} key={main}>
+                    {main}
+                  </option>
+                );
               })}
             </select>
             <select
+              value={sub_location}
               className='sub_location'
               onChange={(e) => {
                 setSub_location(e.target.value);
@@ -171,7 +176,11 @@ const Signup = () => {
                 //배열인지 확인, 배열일 때만 동작하게 && 사용.
                 Array.isArray(get_sub) &&
                   get_sub.map((sub) => {
-                    return <option key={sub}>{sub}</option>;
+                    return (
+                      <option value={sub} key={sub}>
+                        {sub}
+                      </option>
+                    );
                   })
               }
             </select>
@@ -179,20 +188,7 @@ const Signup = () => {
           <label>
             프로필: <button>추가</button> <button>삭제</button>
           </label>
-          <button
-            type='submit'
-            onClick={() => {
-              console.log('email', email);
-              console.log('password', password);
-              console.log('nick', nickname);
-              console.log('g', gender);
-              console.log('m', main_location);
-              console.log('n', sub_location);
-              console.log('p', profile);
-            }}
-          >
-            가입하기
-          </button>
+          <button type='submit'>가입하기</button>
         </form>
       </div>
     </div>
