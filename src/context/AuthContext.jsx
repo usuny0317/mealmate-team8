@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, useRef } from 'react';
 import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
 import { ALERT_TYPE } from '../constants/alertConstant';
@@ -9,44 +9,56 @@ export const AuthProvider = ({ children }) => {
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
 
-  const [isLogin, setIsLogin] = useState(false);
-  const [loggedInUser, setAuthUserId] = useState('anon');
+  //로그인상태(isLogin)와 로그인한유저(loggedInUser)는 세션에서 받아옵니다.
+  //isLogin 세션스토리에 값이 있으면 true 없으면 false가 됩니다.
+  const [isLogin, setIsLogin] = useState(!!sessionStorage.getItem('isLogin'));
+  const loggedInUser =
+    JSON.parse(sessionStorage.getItem('loggedInUser')) || 'anon';
 
   //일단 로그인을 위해 id비밀번호 문자열로 넣어두겠습니다!
   //닉네임 장현빈(님) 과 연결되어 있는 id비밀번호입니다.
   const [userEmail, setUserEmail] = useState('pal@naver.com');
   const [userPassword, setUserPassword] = useState('1234');
-
   useEffect(() => {
     let authUserId = '';
     const getUserInfo = async () => {
       const {
         data: { user },
-        errorSignUp,
       } = await supabase.auth.signInWithPassword({
         email: userEmail,
         password: userPassword,
       });
-      if (errorSignUp) {
-        errorAlert({ type: ERROR, content: '로그인실패 아이디 비밀번호 다름' });
+      if (user === null) {
+        errorAlert({
+          type: ERROR,
+          content: '로그인 실패 :: 아이디 비밀번호를 확인하세요',
+        });
         return;
       }
-      setIsLogin(!!user);
+
       authUserId = user.id;
       //받아온 auth_Id로 해당유저의 public 유저 정보 가져옴
-      const { data, errorFetchUserData } = await supabase
+      const { data } = await supabase
         .from('users')
         .select('*')
         .eq('id', authUserId)
         .single();
-      if (errorFetchUserData) {
-        errorAlert({ type: ERROR, content: '서버에러' });
+      if (data === null) {
+        errorAlert({ type: ERROR, content: '로그인요청오류' });
+        return;
       }
-      setAuthUserId(data);
+
+      //isLogin은 세션스토리지에 값이 존재하면 true가 됩니다.
+      sessionStorage.setItem('isLogin', '로그인완료됨');
+      sessionStorage.setItem('loggedInUser', JSON.stringify(data));
+
+      //로그인상태가 바뀌면 컨텍스트 다시 렌더링
+      setIsLogin(!!user);
     };
+
     getUserInfo();
   }, []);
-  //여기 부분은 로그인 페이지에 있는게 맞는 것 같긴합니다 일단 로그인을 위해 여기에 작성합니다~~
+  //useEffact 부분 잘라내고 폼 제출시 발생하는 이벤트 핸들러에 넣으면 될 거 같아요
 
   return (
     <AuthContext.Provider value={{ isLogin, loggedInUser }}>
