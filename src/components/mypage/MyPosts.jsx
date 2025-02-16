@@ -4,17 +4,18 @@ import { ALERT_TYPE } from '../../constants/alertConstant';
 import PostCard from '../home/PostCard';
 import { alert } from '../../utils/alert';
 import AuthContext from '../../context/AuthContext';
+import styled from 'styled-components';
 //유저 아이디를 기준으로 닉네임을 검색
 //닉네임을 기준으로 데이터 띄우기
 
 export const MyPosts = () => {
-  const { isLogin, loggedInUser } = useContext(AuthContext);
+  //포스터를 저정하는 state
+  const [posts, setPosts] = useState([]);
+  const { loggedInUser } = useContext(AuthContext);
 
   //sweet alert
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
-
-  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const getPostsByUserNickName = async () => {
@@ -40,14 +41,29 @@ export const MyPosts = () => {
         errorAlert({ type: ERROR, content: errorGetPosts.message });
     };
 
-    if (isLogin) getPostsByUserNickName();
+    getPostsByUserNickName();
   }, []);
 
   return (
-    <div>
-      {posts.map((data) => (
-        <PostCard key={`post_${data.id}`} postData={data} />
-      ))}
-    </div>
+    <StMyPostsWrapper>
+      <div className='postCards'>
+        {posts.map((data) => (
+          <PostCard key={`post_${data.id}`} postData={data} />
+        ))}
+      </div>
+    </StMyPostsWrapper>
   );
 };
+
+const StMyPostsWrapper = styled.div`
+  margin-top: 30px;
+  .postCards {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+`;
