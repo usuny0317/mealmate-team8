@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 
       authUserId = user.id;
       //받아온 auth_Id로 해당유저의 public 유저 정보 가져옴
-      const { data, errorFetchUserData } = await supabase
+      const { data } = await supabase
         .from('users')
         .select('*')
         .eq('id', authUserId)
