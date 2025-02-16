@@ -8,53 +8,55 @@ export const EditProfile = () => {
   const navigate = useNavigate();
 
   //스위트알럿설정값
-  const { ERROR } = ALERT_TYPE;
-  const errorAlert = alert();
+  // const { ERROR } = ALERT_TYPE;
+  // const errorAlert = alert();
+  // errorAlert({ type: ERROR, content: '로그인 페이지로 이동합니다.' });
 
-  if (isLogin) {
-    errorAlert({ type: ERROR, content: '로그인 페이지로 이동합니다.' });
-    setTimeout(() => {
-      navigate('/login');
-    }, 0);
-  }
   //폼입력에 쓸 state
   const [userData, setUserData] = useState({
-    nick_name: '',
-    gender: '',
-    main_location: '',
-    sub_location: '',
-    profile:
-      'https://play-lh.googleusercontent.com/38AGKCqmbjZ9OuWx4YjssAz3Y0DTWbiM5HB0ove1pNBq_o9mtWfGszjZNxZdwt_vgHo=w240-h480-rw',
+    nick_name: loggedInUser.nick_name,
+    gender: loggedInUser.gender,
+    main_location: loggedInUser.main_location,
+    sub_location: loggedInUser.sub_location,
+    profile: loggedInUser.profile,
   });
 
   return (
     <>
-      <img src={userData.profile} width='300px' />
-      <label htmlFor='nickname'>변경할 닉네임</label>
-      <input
-        type='text'
-        value={userData.nick_name}
-        onChange={(e) => {
-          setUserData({ ...userData, nick_name: e.target.value });
-        }}
-      />
-      <label htmlFor='nickname'>시</label>
-      <input
-        type='text'
-        value={userData.main_location}
-        onChange={(e) => {
-          setUserData({ ...userData, main_location: e.target.value });
-        }}
-      />
-      <label htmlFor='nickname'>지역</label>
-      <input
-        type='text'
-        value={userData.sub_location}
-        onChange={(e) => {
-          setUserData({ ...userData, sub_location: e.target.value });
-        }}
-      />
-      <span>{userData.gender ? '남자' : '여자'}</span>
+      <div>
+        <img src={userData.profile} width='300px' />
+      </div>
+      <div>
+        <label htmlFor='nickname'>변경할 닉네임 : </label>
+        <input
+          type='text'
+          value={userData.nick_name}
+          onChange={(e) => {
+            setUserData({ ...userData, nick_name: e.target.value });
+          }}
+        />
+      </div>
+      <div>
+        <label htmlFor='nickname'>시 : </label>
+        <input
+          type='text'
+          value={userData.main_location}
+          onChange={(e) => {
+            setUserData({ ...userData, main_location: e.target.value });
+          }}
+        />
+      </div>
+      <div>
+        <label htmlFor='nickname'>지역 : </label>
+        <input
+          type='text'
+          value={userData.sub_location}
+          onChange={(e) => {
+            setUserData({ ...userData, sub_location: e.target.value });
+          }}
+        />
+      </div>
+      <span>성별 : {userData.gender ? '남자' : '여자'}</span>
     </>
   );
 };
