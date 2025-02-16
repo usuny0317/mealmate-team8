@@ -4,31 +4,70 @@ import styled from 'styled-components';
 import { supabase } from '../supabase/client';
 import AuthContext from '../context/AuthContext';
 
+import { alert } from '../utils/alert';
+import { ALERT_TYPE } from '../constants/alertConstant';
+
 //로그인 페이지지
 const LogIn = () => {
+  //alert 사용하기기
+  const { ERROR } = ALERT_TYPE;
+  const errorAlert = alert();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { isLogin, setIsLogin, loggedInUser, setUserEmail } =
+  //구조분해할당으로 context를 받아옵니다.
+  const { isLogin, setIsLogin, loggedInUser, setAuthUserId } =
     useContext(AuthContext);
 
   const navigate = useNavigate();
-
+  //로그인 시도 및 사용자 정보를 context로 보냅니다.
   const Login = async (e) => {
     e.preventDefault();
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
 
-      if (error) throw error;
-      console.log('성공! 유저 데이터:', data);
-      setIsLogin(true);
-      setUserEmail(email);
-      console.log(isLogin);
-      navigate('/');
+    let authUserId = '';
+    //로그인 시도
+    try {
+      {
+        //data/error 형태로 하지 않으면 오류나서 범위 나눴습니다.
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+        //로그인 실패 시, alert
+        if (error) {
+          errorAlert({
+            type: ERROR,
+            content: '로그인실패 아이디 비밀번호 다름',
+          });
+          return;
+        }
+        //성공 시 로그인 상태를 true로 바꿔 줍니다.
+        setIsLogin(true);
+
+        //user의 id 값 << console로 제대로 들어가는 것 확인함!
+        authUserId = data.user.id;
+      }
+      //data / error 형태로 쓰지 않으면 자꾸만 오류가 나서
+      // {}로 범위를 나눠버렸습니다!
+      //받아온 값으로 유저 정보 가져옵니다.
+      {
+        const { data, error } = await supabase //여기서 오류나
+          .from('users')
+          .select('*')
+          .eq('id', authUserId)
+          .limit(1)
+          .maybeSingle();
+
+        //오류날 시
+        if (error) {
+          errorAlert({ type: ERROR, content: '서버 에러!!' });
+        }
+        //성공할 시
+        setAuthUserId(data);
+        navigate('/');
+      }
     } catch (err) {
-      console.error('실패:', err.message);
+      errorAlert({ type: ERROR, content: '에러남!' + err });
     }
   };
 
