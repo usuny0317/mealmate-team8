@@ -9,34 +9,16 @@ import AuthContext from '../context/AuthContext';
 
 const UserPosts = () => {
   const { isLogin, loggedInUser } = useContext(AuthContext);
-
-  //sweet Alert
-  const errorAlert = alert();
-  const { ERROR } = ALERT_TYPE;
+  //받아온 포스트를 저장하는 state
+  const [posts, setPosts] = useState([]);
 
   //패치파라미터로 유저닉네임 가져오기
   const { userNickname } = useParams();
   const navigate = useNavigate();
 
-  //로그인이 안되어 있으면 로그인 페이지로 이동
-  if (isLogin) {
-    errorAlert({
-      type: ERROR,
-      content: '로그인이 필요합니다. 로그인 페이지로 이동합니다.',
-    }).then((res) => {
-      if (res.isConfirmed) navigate('/login', { replace: true });
-    });
-    return <></>;
-  }
-
-  //로그인한 유저가 자신의 프로필을 클릭했을시
-  if (loggedInUser.nick_name === userNickname) {
-    navigate('/mypage/my-posts', { replace: true });
-    return <></>;
-  }
-
-  //받아온 포스트를 저장하는 state
-  const [posts, setPosts] = useState([]);
+  //sweet Alert
+  const errorAlert = alert();
+  const { ERROR } = ALERT_TYPE;
 
   useEffect(() => {
     //받아온 닉네임을 기준으로 포스트리스트에서  가져오기
@@ -51,6 +33,23 @@ const UserPosts = () => {
     };
     if (isLogin) getPosts();
   }, []);
+
+  //로그인이 안되어 있으면 로그인 페이지로 이동
+  if (!isLogin) {
+    errorAlert({
+      type: ERROR,
+      content: '로그인이 필요합니다. 로그인 페이지로 이동합니다.',
+    }).then((res) => {
+      if (res.isConfirmed) navigate('/login', { replace: true });
+    });
+    return <></>;
+  }
+
+  //로그인한 유저가 자신의 프로필을 클릭했을시
+  if (loggedInUser.nick_name === userNickname) {
+    navigate('/mypage/my-posts', { replace: true });
+    return <></>;
+  }
 
   return (
     <StUserPostsWrapper>
