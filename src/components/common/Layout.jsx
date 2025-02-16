@@ -2,13 +2,27 @@ import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import AuthContext from '../../context/AuthContext';
+import { ALERT_TYPE } from '../../constants/alertConstant';
+import { alert } from '../../utils/alert';
 
 export const Layout = ({ children }) => {
-  // const { isLogin } = useContext(AuthContext);
-  const isLogin = true;
+  const { isLogin, setIsLogin } = useContext(AuthContext);
+
+  //전역 theme 가져오기
   const {
     colors: { primaryLight },
   } = useTheme();
+  //스위트알럿설정값
+  const { SUCCESS } = ALERT_TYPE;
+  const errorAlert = alert();
+
+  //로그아웃 핸들러
+  //로그아웃시 세션스토리지를 비우고, constext의 로그인 상태를 false로 전환
+  const logOutHandler = () => {
+    errorAlert({ type: SUCCESS, content: '로그아웃 되었습니다.' });
+    sessionStorage.clear();
+    setIsLogin(false);
+  };
 
   return (
     <>
@@ -23,10 +37,13 @@ export const Layout = ({ children }) => {
             </Link>
           </div>
           <div className='header-mypage-area'>
-            {/* 유저정보에따라 login mypage이동 */}
+            {/* 로그인이 되어있으면, 로그아웃/프로필사진 */}
+            {/* 로그인이 안되어 있으면 로그인하기/회원가입하기 */}
             {isLogin ? (
               <>
-                <div className='header-mypage-context'>로그아웃</div>
+                <div className='header-mypage-context' onClick={logOutHandler}>
+                  로그아웃
+                </div>
                 <Link to='/mypage/my-posts'>
                   <img
                     className='profile'
