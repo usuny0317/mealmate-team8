@@ -9,6 +9,7 @@ import { Layout } from '../components/common/Layout';
 import { EditProfile } from '../components/mypage/EditProfile';
 import { MyPosts } from '../components/mypage/MyPosts';
 import { JoinedPosts } from '../components/mypage/JoinedPosts';
+import UserPosts from '../pages/UserPosts';
 
 const Router = () => {
   return (
@@ -25,6 +26,7 @@ const Router = () => {
           </Route>
           <Route path='/detail' element={<Detail />} />
           <Route path='/posteditior' element={<PostEditor />} />
+          <Route path='/user-posts/:userNickname' element={<UserPosts />} />
         </Routes>
       </Layout>
     </BrowserRouter>
