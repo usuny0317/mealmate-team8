@@ -1,12 +1,18 @@
 import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
+import { alert } from '../utils/alert';
+import { ALERT_TYPE } from '../constants/alertConstant';
+import Swal from 'sweetalert2';
 
 const PostEditor = () => {
   // 파일 최대 크기
   const MAX_FILE_SIZE = 50 * 1024 * 1024;
+  const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
+  const navigate = useNavigate();
+  const alertConsole = alert();
   // 게시글 정보 상태
   const [formData, setFormData] = useState({
     title: '',
@@ -106,25 +112,25 @@ const PostEditor = () => {
     }));
   };
 
-  // 이미지 파일 변경
+  // 이미지 파일 변경\
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const selectedFile = e.target.files[0];
 
-    if (file.size > MAX_FILE_SIZE) {
-      alert('50MB 이하의 파일만 업로드 가능합니다.');
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      alertConsole({
+        type: ERROR,
+        content: '50MB 이하의 파일만 업로드 가능합니다.',
+      });
       return;
     }
-
-    if (
-      !file.type.includes('jpeg') ||
-      !file.name.toLowerCase().endsWith('.jpg')
-    ) {
-      return alert('JPG 파일만 업로드 가능합니다.');
+    if (selectedFile) {
+      setFormData((prev) => ({ ...prev, file: selectedFile }));
+      if (selectedFile.type.startsWith('image/')) {
+        const fileURL = URL.createObjectURL(selectedFile);
+        setFormData((prev) => ({ ...prev, selectedFile }));
+        setImagePreview(fileURL);
+      }
     }
-
-    setFormData((prev) => ({ ...prev, file }));
-    setImagePreview(URL.createObjectURL(file));
   };
 
   // 게시글 입력값 리셋
@@ -175,6 +181,18 @@ const PostEditor = () => {
       .replace(/(\d{4})\. (\d{2})\. (\d{2})\.?/, '$1-$2-$3');
   };
 
+  const cancleHandler = () => {
+    alertConsole({
+      type: WARNING,
+      content: '정말로 취소 하시겠습니까?',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 승인 알림 표시
+        Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
+        navigate('/');
+      }
+    });
+  };
   // 게시글 작성 클릭시 이벤트
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,7 +202,10 @@ const PostEditor = () => {
 
       // 날짜 유효성 검증
       if (new Date(date).getTime() <= new Date().getTime()) {
-        alert('날짜는 현재 시간 이후여야 합니다.');
+        alertConsole({
+          type: ERROR,
+          content: '날짜는 현재 시간 이후여야 합니다.',
+        });
         return;
       }
 
@@ -227,11 +248,17 @@ const PostEditor = () => {
 
       if (postError) {
         console.error('게시글 저장 실패:', postError);
-        alert('게시글 저장에 실패했습니다.');
+        alertConsole({
+          type: ERROR,
+          content: '게시글 저장에 실패했습니다.',
+        });
         return;
       }
 
-      alert('게시글이 성공적으로 작성되었습니다!');
+      alertConsole({
+        type: SUCCESS,
+        content: '게시글이 성공적으로 작성되었습니다!',
+      });
 
       resetForm();
       setImagePreview('');
@@ -379,9 +406,6 @@ const PostEditor = () => {
                       <path d='M17 21v-8H7v8M12 7v6M9 10h6' />
                     </svg>
                     <div>이미지 미리보기 영역</div>
-                    <div style={{ fontSize: '0.9em' }}>
-                      (최대 50MB JPG 파일)
-                    </div>
                   </StPlaceholderText>
                 )}
               </StImagePreview>
@@ -389,22 +413,15 @@ const PostEditor = () => {
           </StInputRow>
           <StButtonGroup>
             <StButton type='submit'>작성 완료</StButton>
-            <Link
-              to={'/'}
-              onClick={(e) => {
-                if (
-                  !window.confirm(
-                    '정말 취소하시겠습니까? 작성 중인 내용이 사라집니다.'
-                  )
-                ) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              <StButton type='button' className='cancel'>
+            <div>
+              <StButton
+                type='button'
+                onClick={cancleHandler}
+                className='cancel'
+              >
                 취소하기
               </StButton>
-            </Link>
+            </div>
           </StButtonGroup>
         </StPostForm>
       </StEditorWrapper>
@@ -482,7 +499,7 @@ const StInputGroup = styled.div`
 
 const StInputRow = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 
