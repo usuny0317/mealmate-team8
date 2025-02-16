@@ -28,7 +28,7 @@ const Signup = () => {
   const navigate = useNavigate();
 
   //스위트alert
-  const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
+  const { SUCCESS, ERROR } = ALERT_TYPE;
   const SignupAlert = alert();
 
   //1. select Box useEffect
