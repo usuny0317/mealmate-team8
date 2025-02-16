@@ -1,9 +1,13 @@
 import styled from 'styled-components';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabase/client';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
 
 const PostEditor = () => {
+  // 파일 최대 크기
+  const MAX_FILE_SIZE = 50 * 1024 * 1024;
+  // 게시글 정보 상태
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -15,8 +19,85 @@ const PostEditor = () => {
 
   const [imagePreview, setImagePreview] = useState(''); // 이미지 미리보기 상태
   const fileInputRef = useRef(null); // 파일 입력 필드 접근을 위한 ref
+  const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 }); // 지도의 위치값 상태
 
-  // 입력 필드 핸들러 (재사용 가능)
+  // 다음 주소 검색 api
+  useEffect(() => {
+    let postcodeScript = null;
+
+    const loadPostcodeScript = () => {
+      postcodeScript = document.createElement('script');
+      postcodeScript.src =
+        '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      postcodeScript.async = true;
+
+      document.head.appendChild(postcodeScript);
+
+      return new Promise((resolve) => {
+        postcodeScript.onload = resolve;
+      });
+    };
+
+    loadPostcodeScript().catch(console.error);
+
+    return () => {
+      if (postcodeScript && document.head.contains(postcodeScript)) {
+        document.head.removeChild(postcodeScript);
+      }
+    };
+  }, []);
+
+  // 엔터 키 눌림 방지 함수
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // 엔터 키 기본 동작(폼 제출)을 막음
+      searchAddress(formData.location); // 엔터 클릭시 검색 함수 실행
+    }
+  };
+
+  // . 검색 함수
+  const searchAddress = useCallback(
+    (inputAddress) => {
+      const searchQuery = inputAddress?.trim() || formData.location.trim();
+      const { kakao } = window;
+      if (!kakao?.maps?.services)
+        return console.error('Kakao Map API 로드 실패');
+
+      new kakao.maps.services.Geocoder().addressSearch(
+        searchQuery,
+        (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            setPosition({
+              lat: +result[0].y,
+              lng: +result[0].x,
+              isPanTo: true,
+            });
+          }
+        }
+      );
+    },
+    [formData.location]
+  );
+
+  // 주소 검색창 핸들러
+  const handleAddressSearch = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        const address = data.roadAddress || data.jibunAddress;
+
+        // 상태 업데이트와 동시에 검색 실행
+        setFormData((prev) => ({
+          ...prev,
+          location: address,
+        }));
+
+        // 선택한 주소를 바로 전달하여 검색
+        searchAddress(address);
+      },
+    }).open();
+  };
+
+  // 입력 필드 핸들러
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
@@ -25,22 +106,45 @@ const PostEditor = () => {
     }));
   };
 
+  // 이미지 파일 변경
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      const fileExtension = selectedFile.name.split('.').pop().toLowerCase(); // 확장자 추출
-      if (selectedFile.type !== 'image/jpeg' || fileExtension !== 'jpg') {
-        alert('허용된 이미지 파일(.jpg)만 업로드 가능합니다.');
-        return;
-      }
-      setFormData((prev) => ({ ...prev, file: selectedFile }));
-      const fileURL = URL.createObjectURL(selectedFile);
-      setImagePreview(fileURL);
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert('50MB 이하의 파일만 업로드 가능합니다.');
+      return;
     }
+
+    if (
+      !file.type.includes('jpeg') ||
+      !file.name.toLowerCase().endsWith('.jpg')
+    ) {
+      return alert('JPG 파일만 업로드 가능합니다.');
+    }
+
+    setFormData((prev) => ({ ...prev, file }));
+    setImagePreview(URL.createObjectURL(file));
   };
 
+  // 게시글 입력값 리셋
+  const resetForm = useCallback(() => {
+    setFormData({
+      title: '',
+      content: '',
+      date: '',
+      numberOfPeople: 1,
+      location: '',
+      file: null,
+    });
+    setImagePreview('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, []);
+
+  // 이미지 제거
   const handleRemoveImage = (e) => {
-    e.stopPropagation(); // remove 버튼 클릭 시 파일 선택창을 열지 않도록
+    e.preventDefault(); // 추가: 기본 동작 방지
+    e.stopPropagation(); // 이벤트 버블링 방지
     setFormData((prev) => ({ ...prev, file: null }));
     setImagePreview('');
     if (fileInputRef.current) {
@@ -55,39 +159,36 @@ const PostEditor = () => {
     };
   }, [imagePreview]);
 
+  // 입력시간 한국 시간으로 변경
   const getKoreanTime = () => {
-    const options = {
-      timeZone: 'Asia/Seoul',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    };
-
-    const koreanTime = new Date().toLocaleString('ko-KR', options);
-
-    const formattedDate = koreanTime
-      .replace(/오전/g, 'AM')
-      .replace(/오후/g, 'PM')
-      .replace(/(\d{4})\.\s(\d{2})\.\s(\d{2})\./, '$1-$2-$3')
-      .replace(/(\d{2}):(\d{2}):(\d{2})/, '$1:$2:$3'); // 24시간 형식으로 변환
-    return formattedDate;
+    return new Date()
+      .toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      })
+      .replace(/(\d{4})\. (\d{2})\. (\d{2})\.?/, '$1-$2-$3');
   };
 
+  // 게시글 작성 클릭시 이벤트
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const { title, content, date, numberOfPeople, location, file } = formData;
 
+      // 날짜 유효성 검증
       if (new Date(date).getTime() <= new Date().getTime()) {
         alert('날짜는 현재 시간 이후여야 합니다.');
         return;
       }
 
-      // 이미지 업로드
+      // 스토리지 이미지 업로드
       let fileUrl = '';
       if (file) {
         const fileExtension = file.name.split('.').pop();
@@ -106,7 +207,8 @@ const PostEditor = () => {
         fileUrl = getImageUrl(filePath); // 업로드된 파일 URL 저장
       }
 
-      const formData2 = {
+      // 업로드 데이터
+      const uploadData = {
         post_title: title,
         post_content: content,
         post_location: location,
@@ -121,7 +223,7 @@ const PostEditor = () => {
       // 게시글 데이터 저장 (예: Supabase 데이터베이스에 저장)
       const { error: postError } = await supabase
         .from('posts')
-        .upsert(formData2);
+        .upsert(uploadData);
 
       if (postError) {
         console.error('게시글 저장 실패:', postError);
@@ -131,27 +233,22 @@ const PostEditor = () => {
 
       alert('게시글이 성공적으로 작성되었습니다!');
 
-      // 폼 데이터 초기화
-      setFormData({
-        title: '',
-        content: '',
-        date: '',
-        numberOfPeople: 1,
-        location: '',
-        file: null,
-      });
+      resetForm();
       setImagePreview('');
+      setPosition({ lat: 37.5665, lng: 126.978 });
     } catch (error) {
       console.error('게시글 작성 실패:', error);
     }
   };
 
+  // 이미지 url 가져오기
   const getImageUrl = (imageName) => {
     return `${
       import.meta.env.VITE_APP_SUPABASE_URL
     }/storage/v1/object/public/post-images/public/${imageName}`;
   };
 
+  // 모집인원 입력시 초기값 0을 제거
   function preventLeadingZero(input) {
     // 첫 번째 문자가 "0"이고 그 뒤에 다른 숫자가 있으면 "0" 제거
     if (input.value && input.value[0] === '0') {
@@ -160,13 +257,13 @@ const PostEditor = () => {
   }
 
   return (
-    <Root>
+    <StRoot>
       <StTitleContainer>
         <h2>게시글 작성</h2>
       </StTitleContainer>
       <StEditorWrapper>
-        <StPostForm onSubmit={handleSubmit}>
-          <InputGroup>
+        <StPostForm onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+          <StInputGroup>
             <StLabel>
               제목
               <StInput
@@ -174,23 +271,23 @@ const PostEditor = () => {
                 name='title'
                 placeholder='게시글 제목을 입력하세요'
                 className='title-input'
-                value={formData.title} // 제목 입력값은 title 상태
-                onChange={handleInputChange} // 변경 시 상태 업데이트
+                value={formData.title}
+                onChange={handleInputChange}
                 maxLength={50}
-                required // 필수 입력 필드로 설정
+                required
               />
             </StLabel>
-          </InputGroup>
+          </StInputGroup>
 
-          <InputRow>
+          <StInputRow>
             <StLabel className='half-width'>
               날짜
               <StInput
                 type='datetime-local'
                 name='date'
-                value={formData.date} // 날짜 입력값은 date 상태
-                onChange={handleInputChange} // 변경 시 상태 업데이트
-                required // 필수 입력 필드로 설정
+                value={formData.date}
+                onChange={handleInputChange}
+                required
               />
             </StLabel>
             <StLabel className='half-width'>
@@ -200,13 +297,13 @@ const PostEditor = () => {
                 name='numberOfPeople'
                 min='1'
                 placeholder='인원수를 입력'
-                value={formData.numberOfPeople} // 모집인원 입력값은 numberOfPeople 상태
-                onChange={handleInputChange} // 변경 시 상태 업데이트
-                required // 필수 입력 필드로 설정
-                onInput={(event) => preventLeadingZero(event.target)} //0이 중복되면 0을 제거
+                value={formData.numberOfPeople}
+                onChange={handleInputChange}
+                required
+                onInput={(event) => preventLeadingZero(event.target)}
               />
             </StLabel>
-          </InputRow>
+          </StInputRow>
 
           <StLabel>
             내용
@@ -214,28 +311,44 @@ const PostEditor = () => {
               name='content'
               placeholder='게시글 내용을 상세히 입력하세요'
               rows={8}
-              value={formData.content} // 내용 입력값은 content 상태
-              onChange={handleInputChange} // 변경 시 상태 업데이트
-              required // 필수 입력 필드로 설정
+              value={formData.content}
+              onChange={handleInputChange}
+              required
             />
           </StLabel>
 
-          <InputRow>
-            <StLabelPlace className='half-width'>
+          <StInputRow>
+            <StLabel className='half-width'>
               장소
-              <StInput
-                type='text'
-                name='location'
-                placeholder='모임 장소 입력'
-                value={formData.location} // 장소 입력값은 location 상태
-                onChange={handleInputChange} // 변경 시 상태 업데이트
-                required // 필수 입력 필드로 설정
-              />
-            </StLabelPlace>
+              <StInputButtonContainer>
+                <StInput
+                  type='text'
+                  name='location'
+                  placeholder='"예) 서울특별시 강남구 테헤란로 427"'
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  onBlur={() => searchAddress()}
+                  required
+                />
+                <StSearchButton type='button' onClick={handleAddressSearch}>
+                  검색
+                </StSearchButton>
+              </StInputButtonContainer>
+              <StMapContainer>
+                <Map
+                  center={position}
+                  isPanto={position.isPanTo}
+                  style={{ width: '100%', height: '100%' }}
+                  level={3}
+                >
+                  <MapMarker position={position} />
+                </Map>
+              </StMapContainer>
+            </StLabel>
             <StLabel className='half-width'>
               이미지 추가
-              <FileUploadWrapper>
-                <FileUploadLabel htmlFor='inputFile'>
+              <StFileUploadWrapper>
+                <StFileUploadLabel htmlFor='inputFile'>
                   클릭하여 이미지 선택
                   <StInput
                     type='file'
@@ -244,18 +357,37 @@ const PostEditor = () => {
                     ref={fileInputRef}
                     onChange={handleFileChange}
                   />
-                </FileUploadLabel>
-              </FileUploadWrapper>
-              {imagePreview && (
-                <ImagePreview>
-                  <img src={imagePreview} alt='이미지 미리보기' />
-                  <RemoveButton onClick={handleRemoveImage}>×</RemoveButton>
-                </ImagePreview>
-              )}
+                </StFileUploadLabel>
+              </StFileUploadWrapper>
+              <StImagePreview>
+                {imagePreview ? (
+                  <>
+                    <img src={imagePreview} alt='이미지 미리보기' />
+                    <StRemoveButton onClick={handleRemoveImage}>
+                      ×
+                    </StRemoveButton>
+                  </>
+                ) : (
+                  <StPlaceholderText>
+                    <svg
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2'
+                    >
+                      <path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z' />
+                      <path d='M17 21v-8H7v8M12 7v6M9 10h6' />
+                    </svg>
+                    <div>이미지 미리보기 영역</div>
+                    <div style={{ fontSize: '0.9em' }}>
+                      (최대 50MB JPG 파일)
+                    </div>
+                  </StPlaceholderText>
+                )}
+              </StImagePreview>
             </StLabel>
-          </InputRow>
-
-          <ButtonGroup>
+          </StInputRow>
+          <StButtonGroup>
             <StButton type='submit'>작성 완료</StButton>
             <Link
               to={'/'}
@@ -273,26 +405,24 @@ const PostEditor = () => {
                 취소하기
               </StButton>
             </Link>
-          </ButtonGroup>
+          </StButtonGroup>
         </StPostForm>
       </StEditorWrapper>
-    </Root>
+    </StRoot>
   );
 };
 
-// Styled Components는 그대로 두고, 필요한 부분만 수정했습니다.
-
 // Styled Components
-const Root = styled.div`
+const StRoot = styled.div`
   width: 100%;
-  overflow: hidden; /* 세로 스크롤 숨기기 */
+  overflow: hidden;
   background: #f5f7fb;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 0; /* 불필요한 여백 제거 */
+  padding: 0;
 `;
 
 const StTitleContainer = styled.div`
@@ -346,11 +476,11 @@ const StPostForm = styled.form`
   }
 `;
 
-const InputGroup = styled.div`
+const StInputGroup = styled.div`
   margin-bottom: 1.5rem;
 `;
 
-const InputRow = styled.div`
+const StInputRow = styled.div`
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
@@ -364,10 +494,13 @@ const InputRow = styled.div`
 `;
 
 const StLabel = styled.label`
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #2d3748;
+  gap: 10px;
+  margin-top: 10px;
 
   &.half-width {
     flex: 1;
@@ -381,7 +514,7 @@ const StLabel = styled.label`
 
 const StInput = styled.input`
   width: 100%;
-  height: 48px; // 고정 높이 추가
+  height: 48px;
   padding: 0 1rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -411,8 +544,7 @@ const StInput = styled.input`
   }
 `;
 
-// 파일 업로드 영역 스타일 추가
-const FileUploadWrapper = styled.div`
+const StFileUploadWrapper = styled.div`
   position: relative;
   height: 48px;
   border: 1px solid #e2e8f0;
@@ -420,13 +552,14 @@ const FileUploadWrapper = styled.div`
   overflow: hidden;
   background: #f8fafc;
   transition: all 0.2s;
+  margin-bottom: 0.5rem;
 
   &:hover {
     background: #f1f5f9;
   }
 `;
 
-const FileUploadLabel = styled.label`
+const StFileUploadLabel = styled.label`
   display: flex;
   align-items: center;
   height: 100%;
@@ -435,24 +568,7 @@ const FileUploadLabel = styled.label`
   cursor: pointer;
 `;
 
-const StLabelPlace = styled.label`
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #2d3748;
-
-  &.half-width {
-    flex: 1;
-    min-width: 280px;
-
-    @media (max-width: 600px) {
-      min-width: 100%;
-    }
-  }
-`;
-
 const StTextArea = styled.textarea`
-  width: 100%;
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -467,25 +583,52 @@ const StTextArea = styled.textarea`
   }
 `;
 
-const ImagePreview = styled.div`
-  margin-top: 1rem;
-  width: 100%; /* 부모 요소에 맞춰 100% 너비로 꽉 차게 설정 */
+const StImagePreview = styled.div`
+  width: 100%;
+  height: 370px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  padding-top: 56.25%; /* 비율 16:9 (높이/너비 = 9/16 = 0.5625) */
   overflow: hidden;
 
   img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 비율을 유지하면서 이미지가 영역을 꽉 채우도록 설정 */
-    border-radius: 6px;
+    object-fit: contain;
+    background: repeating-conic-gradient(#f0f0f0 0% 25%, white 0% 50%) 50% /
+      20px 20px;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: scale-down;
   }
 `;
 
-const ButtonGroup = styled.div`
+const StPlaceholderText = styled.div`
+  text-align: center;
+  color: #718096;
+  padding: 1rem;
+  z-index: 1;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.5rem;
+    stroke: #4299e1;
+  }
+`;
+
+const StMapContainer = styled.div`
+  width: 100%;
+  height: 370px;
+  margin-top: 0.5rem;
+  background-color: #f0f0f0;
+`;
+
+const StButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 2rem;
@@ -521,7 +664,7 @@ const StButton = styled.button`
   }
 `;
 
-const RemoveButton = styled.button`
+const StRemoveButton = styled.button`
   position: absolute;
   top: 12px;
   right: 12px;
@@ -540,6 +683,27 @@ const RemoveButton = styled.button`
 
   &:hover {
     background: rgba(0, 0, 0, 0.8);
+  }
+`;
+
+const StInputButtonContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  width: 100%;
+`;
+
+const StSearchButton = styled.button`
+  padding: 0.5rem 1rem;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: #3182ce;
   }
 `;
 
