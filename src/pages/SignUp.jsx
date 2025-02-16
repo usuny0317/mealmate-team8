@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { main_select, get_sub_select } from '../constants/signUpSelector';
 import { supabase } from '../supabase/client';
 
+import { alert } from '../utils/alert';
+import { ALERT_TYPE } from '../constants/alertConstant';
+
 //회원가입페이지지
 const Signup = () => {
   //값 보내주고 관리하기 위한 state
@@ -24,6 +27,10 @@ const Signup = () => {
   //완료 후 로그인으로 보내 줄 navigate
   const navigate = useNavigate();
 
+  //스위트alert
+  const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
+  const SignupAlert = alert();
+
   //1. select Box useEffect
   useEffect(() => {
     //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
@@ -34,17 +41,6 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    //회원가입을 하려니까 규칙이 있었다는 것 같아요.
-    //유효성 검사를 추가했습니다.
-    if (!email || !password) {
-      alert('이메일과 비밀번호를 입력해 주세요.');
-      return;
-    }
-
-    if (password.length < 6) {
-      alert('비밀번호는 최소 6자 이상이어야 합니다.');
-      return;
-    }
 
     //수파 베이스 연결 시도하기기
     try {
@@ -70,12 +66,17 @@ const Signup = () => {
       });
       if (userErr) throw userErr;
 
-      //다혜님 alert로 바꾸기기
-      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+      SignupAlert({
+        type: SUCCESS,
+        content: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
+      });
+
       navigate('/login');
     } catch (error) {
-      alert(error.message);
-      console.error('회원가입 오류:', error);
+      SignupAlert({
+        type: ERROR,
+        content: '회원가입에 실패했습니다!!' + error,
+      });
     }
   };
 
@@ -89,6 +90,8 @@ const Signup = () => {
             이메일:{' '}
             <input
               placeholder='이메일'
+              /* 아래는 이메일 정규식이라하네요! 형식과 다르면 입력이 안됩니다! 마지막은 com 이나 net이여야합니다!*/
+              pattern='^[^\s@]+@[^\s@]+\.[^\s@]+$'
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
@@ -99,6 +102,7 @@ const Signup = () => {
             비밀번호:{' '}
             <input
               type='password'
+              minLength={6}
               required
               placeholder='비밀번호'
               onChange={(e) => {
