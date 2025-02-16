@@ -3,9 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase/client.js';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import {DetailAction} from '../components/detail/DetailAction';
+import { DetailAction } from '../components/detail/DetailAction';
 import { CommentSection } from '../components/detail/CommentSection.jsx';
-import {alert} from "../utils/alert.js"
+import { alert } from '../utils/alert.js';
 import { ALERT_TYPE } from '../constants/alertConstant';
 
 export const Detail = () => {
@@ -52,7 +52,8 @@ export const Detail = () => {
       <StArticleContainer>
         <StTitle>{post.post_title}</StTitle>
         <StAuthorInfo>
-          작성자: {post.author_name} · {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}
+          작성자: {post.author_name} ·{' '}
+          {dayjs(post.post_date).format('YYYY년 MM월 DD일 HH시 mm분')}
         </StAuthorInfo>
         {post.post_img_url && (
           <StImageContainer>
@@ -92,7 +93,7 @@ const StArticleContainer = styled.div`
   background: #fff;
   padding: 40px;
   border-radius: 8px;
-  
+
   line-height: 1.8;
 `;
 
