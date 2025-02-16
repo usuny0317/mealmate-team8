@@ -1,14 +1,22 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../../supabase/client';
+import { useContext, useState } from 'react';
 import { alert } from '../../utils/alert';
 import { ALERT_TYPE } from '../../constants/alertConstant';
+import AuthContext from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 export const EditProfile = () => {
-  const 전역값으로받아올유저아이디 = 'c712d979-726f-4101-a794-519d5ff79c09';
-  const isLogin = '로그인이 되어있습니다.';
+  const { isLogin, loggedInUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   //스위트알럿설정값
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
+
+  if (isLogin) {
+    errorAlert({ type: ERROR, content: '로그인 페이지로 이동합니다.' });
+    setTimeout(() => {
+      navigate('/login');
+    }, 0);
+  }
   //폼입력에 쓸 state
   const [userData, setUserData] = useState({
     nick_name: '',
@@ -18,28 +26,6 @@ export const EditProfile = () => {
     profile:
       'https://play-lh.googleusercontent.com/38AGKCqmbjZ9OuWx4YjssAz3Y0DTWbiM5HB0ove1pNBq_o9mtWfGszjZNxZdwt_vgHo=w240-h480-rw',
   });
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', 전역값으로받아올유저아이디)
-        .single();
-      if (error) {
-        errorAlert({
-          type: ERROR,
-          content: error.message,
-        });
-      }
-      setUserData(data);
-    };
-
-    //유저상태값이 들어갈 부분입니다.
-    if (isLogin) {
-      fetchUserProfile();
-    }
-  }, []);
 
   return (
     <>

@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { supabase } from '../../supabase/client';
 import { ALERT_TYPE } from '../../constants/alertConstant';
 import PostCard from '../home/PostCard';
 import { alert } from '../../utils/alert';
+import AuthContext from '../../context/AuthContext';
 //유저 아이디를 기준으로 닉네임을 검색
 //닉네임을 기준으로 데이터 띄우기
 
 export const MyPosts = () => {
-  const 전역값으로받아올유저아이디 = 'c712d979-726f-4101-a794-519d5ff79c09';
-  const isLogin = '로그인이 되어있습니다.';
+  const { isLogin, loggedInUser } = useContext(AuthContext);
 
   //sweet alert
   const { ERROR } = ALERT_TYPE;
@@ -25,7 +25,7 @@ export const MyPosts = () => {
       } = await supabase
         .from('users')
         .select('nick_name')
-        .eq('id', 전역값으로받아올유저아이디);
+        .eq('id', loggedInUser.id);
 
       //받아온 닉네임을 기준으로 포스트리스트에서  가져오기
       const { data, errorGetPosts } = await supabase
