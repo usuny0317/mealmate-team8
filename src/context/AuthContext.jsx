@@ -10,9 +10,7 @@ export const AuthProvider = ({ children }) => {
     JSON.parse(sessionStorage.getItem('loggedInUser')) || 'anon';
 
   return (
-    <AuthContext.Provider
-      value={{ isLogin, setIsLogin, loggedInUser, setAuthUserId }}
-    >
+    <AuthContext.Provider value={{ isLogin, setIsLogin, loggedInUser }}>
       {children}
     </AuthContext.Provider>
   );
