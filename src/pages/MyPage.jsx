@@ -1,10 +1,32 @@
 import styled from 'styled-components';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
+import { ALERT_TYPE } from '../constants/alertConstant';
+import { alert } from '../utils/alert';
 
 //마이페이지
 const MyPage = () => {
   //현재있는 페이지를 기준으로 폰트두깨가 변경됩니다
+  const { isLogin } = useContext(AuthContext);
+  const navigate = useNavigate();
   const currentLocation = useLocation().pathname.slice(8);
+
+  //sweet alert
+  const { ERROR } = ALERT_TYPE;
+  const errorAlert = alert();
+
+  //로그인이 안되어 있으면 로그인 페이지로 이동
+  if (!isLogin) {
+    errorAlert({
+      type: ERROR,
+      content: '로그인이 필요합니다. 로그인 페이지로 이동합니다.',
+    }).then((res) => {
+      if (res.isConfirmed) navigate('/login', { replace: true });
+    });
+    return <></>;
+  }
+
   return (
     <StMypage>
       <div>
