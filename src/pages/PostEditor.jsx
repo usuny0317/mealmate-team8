@@ -465,6 +465,7 @@ const PostEditor = () => {
                     id='inputFile'
                     accept='image/*'
                     ref={fileInputRef}
+                    required
                     onChange={handleFileChange}
                   />
                 </StFileUploadLabel>
