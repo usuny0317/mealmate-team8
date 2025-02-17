@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import PostCard from '../components/home/PostCard';
 import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
@@ -25,10 +25,9 @@ const UserPosts = () => {
     const getPosts = async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select('*, users!inner(profile)')
+        .select('*, users!inner(profile) ,actions(*)')
         .eq('author_name', userNickname);
       setPosts(data);
-
       if (error) errorAlert({ type: ERROR, content: error.message });
     };
     if (isLogin) getPosts();
