@@ -7,7 +7,7 @@ import { main_select, sub_select } from '../../constants/signUpSelector';
 import styled from 'styled-components';
 import { supabase } from '../../supabase/client';
 export const EditProfile = () => {
-  const { loggedInUser, setUserChange } = useContext(AuthContext);
+  const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   //스위트알럿설정값
@@ -55,7 +55,7 @@ export const EditProfile = () => {
     }
     //페이지가 새로고침될때 세션스토리지에서 user정보를 가져오기 때문에 세션스토리지도 변경
     sessionStorage.setItem('loggedInUser', JSON.stringify(...data));
-    setUserChange((prev) => !prev);
+    setLoggedInUser(...data);
     errorAlert({
       type: SUCCESS,
       content: '수정이 완료 되었습니다.',
