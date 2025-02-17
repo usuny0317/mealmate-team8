@@ -11,7 +11,7 @@ const Signup = () => {
   //이미지 도전
   const fileInputRef = useRef(null);
   const [imagePreview, setImagePreview] = useState('');
-  const defalt_img = '/user.png';
+  const defalt_img = '/user2.png';
   //값 보내주고 관리하기 위한 state
   //일단 작성하고 나중에 묶을까 생각 중입니다.
   const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ const Signup = () => {
   const [gender, setGender] = useState(true);
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
-  const [profile, setProfile] = useState(defalt_img);
+  const [profile, setProfile] = useState(null);
 
   const [check, setCheck] = useState(false);
   //셀렉트 박스 전용
@@ -89,7 +89,7 @@ const Signup = () => {
         }
 
         //스토리지에 이미지 업로드
-        let fileUrl = profile;
+        let fileUrl = defalt_img;
         console.log('', profile);
         if (profile) {
           console.log('프로필 값은 있네용');
@@ -104,6 +104,8 @@ const Signup = () => {
             .upload(`public/${filePath}`, profile);
           if (error) throw error;
           fileUrl = getImageUrl(filePath);
+        } else {
+          fileUrl = defalt_img;
         }
         console.log(fileUrl);
 
@@ -137,9 +139,12 @@ const Signup = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
 
-    setProfile(selectedFile);
-    const fileURL = URL.createObjectURL(selectedFile);
-    setImagePreview(fileURL);
+    if (selectedFile) {
+      const fileURL = URL.createObjectURL(selectedFile);
+      setImagePreview(fileURL);
+      setProfile(selectedFile);
+    }
+
     //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
     //스토리지 > url 가져와서 테이블에 저장
   };
@@ -147,7 +152,7 @@ const Signup = () => {
   const handleDeletImg = (e) => {
     e.stopPropagation();
     setProfile('');
-    setImagePreview('');
+    setImagePreview(defalt_img);
   };
 
   const getImageUrl = (imageName) => {
@@ -283,7 +288,15 @@ const Signup = () => {
             {imagePreview && (
               <div>
                 {' '}
-                <img src={imagePreview} alt='이미지 미리보기' />
+                <img
+                  src={imagePreview}
+                  alt='이미지 미리보기'
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    objectFit: 'cover',
+                  }}
+                />
               </div>
             )}
             <button type='button' onClick={handleDeletImg}>
