@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { main_select, get_sub_select } from '../constants/signUpSelector';
 import { supabase } from '../supabase/client';
@@ -8,6 +8,10 @@ import { ALERT_TYPE } from '../constants/alertConstant';
 
 //회원가입페이지지
 const Signup = () => {
+  //이미지 도전
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const defalt_img = '/user.png';
   //값 보내주고 관리하기 위한 state
   //일단 작성하고 나중에 묶을까 생각 중입니다.
   const [email, setEmail] = useState('');
@@ -16,9 +20,9 @@ const Signup = () => {
   const [gender, setGender] = useState(true);
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
-  const [profile, setProfile] = useState(
-    'https://www.icreta.com/files/attach/images/319/275/055/8e2c1590a474a9afb78c4cb23a9af5b2.jpg'
-  );
+  const [profile, setProfile] = useState(defalt_img);
+
+  const [check, setCheck] = useState(false);
   //셀렉트 박스 전용
   const mainselect = main_select;
   //select박스에서 두번째 인자 전용입니다!
@@ -31,53 +35,125 @@ const Signup = () => {
   const { SUCCESS, ERROR } = ALERT_TYPE;
   const SignupAlert = alert();
 
-  //1. select Box useEffect
+  //select Box useEffect
   useEffect(() => {
     //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
     if (main_location) {
       setget_sub(get_sub_select(main_location));
+      setSub_location(get_sub_select(main_location)[0]);
     }
   }, [main_location]);
 
+  //닉네임 중복 핸들러
+  const handleNickname = async (e) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase
+        .from('users') // 테이블 이름
+        .select('nick_name');
+      if (error) throw error;
+
+      const nickNames = data.map((item) => item.nick_name);
+
+      if (!nickNames.includes(nickname) && nickname !== '') {
+        setCheck(true);
+        SignupAlert({ type: SUCCESS, content: '사용가능합니다!' });
+      } else if (nickname === '') {
+        throw '닉네임이 빈 값입니다.';
+      } else {
+        throw '중복 닉네임입니다!';
+      }
+    } catch (error) {
+      SignupAlert({ type: ERROR, content: '실패했습니다!' + error });
+    }
+  };
+
+  //회원가입 핸들러
   const handleSignup = async (e) => {
     e.preventDefault();
-
     //수파 베이스 연결 시도하기기
     try {
-      // 이메일 비밀번호로 회원가입!!
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      if (!check) throw '닉네임 중복 검사를 해주세요';
+      else {
+        // 이메일 비밀번호로 회원가입!!
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (authErr) throw authErr;
-      //정보가 없는 경우도 추가했습니다.
-      if (!authData || !authData.user) {
-        throw new Error('회원가입 실패: 유저 정보가 없습니다.');
+        if (authErr) throw authErr;
+
+        //정보가 없는 경우도 추가했습니다.
+        if (!authData || !authData.user) {
+          throw new Error('회원가입 실패: 유저 정보가 없습니다.');
+        }
+
+        //스토리지에 이미지 업로드
+        let fileUrl = profile;
+        console.log('', profile);
+        if (profile) {
+          console.log('프로필 값은 있네용');
+          const fileExtension = profile.name.split('.').pop();
+          console.log('fileEx', fileExtension);
+          const filePath = `upload/${Date.now()}.${fileExtension}`;
+          console.log('filePath', filePath);
+
+          //새 이미지 업로드
+          const { error } = await supabase.storage
+            .from('profile-images')
+            .upload(`public/${filePath}`, profile);
+          if (error) throw error;
+          fileUrl = getImageUrl(filePath);
+        }
+        console.log(fileUrl);
+
+        const { error: userErr } = await supabase.from('users').insert({
+          id: authData.user.id,
+          nick_name: nickname,
+          gender,
+          main_location,
+          sub_location,
+          profile: fileUrl,
+        });
+
+        if (userErr) throw userErr;
+
+        SignupAlert({
+          type: SUCCESS,
+          content: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
+        });
+
+        navigate('/login');
       }
-
-      const { error: userErr } = await supabase.from('users').insert({
-        id: authData.user.id,
-        nick_name: nickname,
-        gender,
-        main_location,
-        sub_location,
-        profile,
-      });
-      if (userErr) throw userErr;
-
-      SignupAlert({
-        type: SUCCESS,
-        content: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
-      });
-
-      navigate('/login');
     } catch (error) {
       SignupAlert({
         type: ERROR,
         content: '회원가입에 실패했습니다!!' + error,
       });
     }
+  };
+
+  //이미지 핸들러
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+
+    setProfile(selectedFile);
+    const fileURL = URL.createObjectURL(selectedFile);
+    setImagePreview(fileURL);
+    //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
+    //스토리지 > url 가져와서 테이블에 저장
+  };
+
+  const handleDeletImg = (e) => {
+    e.stopPropagation();
+    setProfile('');
+    setImagePreview('');
+  };
+
+  const getImageUrl = (imageName) => {
+    return `${
+      import.meta.env.VITE_APP_SUPABASE_URL
+    }/storage/v1/object/public/profile-images/public/${imageName}`;
   };
 
   return (
@@ -90,8 +166,7 @@ const Signup = () => {
             이메일:{' '}
             <input
               placeholder='이메일'
-              /* 아래는 이메일 정규식이라하네요! 형식과 다르면 입력이 안됩니다! 마지막은 com 이나 net이여야합니다!*/
-              pattern='^[^\s@]+@[^\s@]+\.[^\s@]+$'
+              type='email'
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
@@ -119,6 +194,9 @@ const Signup = () => {
                 setNickname(e.target.value);
               }}
             />
+            <button type='button' onClick={handleNickname}>
+              중복 검사
+            </button>
           </label>
           <label>
             성별:
@@ -128,6 +206,7 @@ const Signup = () => {
                 type='radio'
                 value={true}
                 name='gender'
+                defaultChecked
                 onChange={() => {
                   setGender(true);
                 }}
@@ -157,8 +236,6 @@ const Signup = () => {
               onChange={(e) => {
                 const selectedValue = e.target.value;
                 setMain_location(selectedValue);
-
-                console.log(main_location);
               }}
             >
               {mainselect.map((main) => {
@@ -190,9 +267,37 @@ const Signup = () => {
             </select>
           </label>
           <label>
-            프로필: <button>추가</button> <button>삭제</button>
+            프로필:
+            <div>
+              <div htmlFor='inputFile'>
+                클릭하여 이미지 선택
+                <input
+                  type='file'
+                  id='inputFile'
+                  accept='image/*'
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+            {imagePreview && (
+              <div>
+                {' '}
+                <img src={imagePreview} alt='이미지 미리보기' />
+              </div>
+            )}
+            <button type='button' onClick={handleDeletImg}>
+              이미지 삭제
+            </button>
           </label>
-          <button type='submit'>가입하기</button>
+          <button
+            type='submit'
+            onClick={() => {
+              console.log('' + profile);
+            }}
+          >
+            가입하기
+          </button>
         </form>
       </div>
     </div>
