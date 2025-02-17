@@ -3,66 +3,92 @@ import { supabase } from "../../supabase/client";
 import styled from "styled-components";
 import { Heart } from "lucide-react";
 
-export const DetailAction = ({ postId, userId }) => {
-  const [likeCount, setLikeCount] = useState(0); // 좋아요 수
-  const [liked, setLiked] = useState(false); // 현재 사용자가 눌렀는지 여부
+export const DetailAction = ({ postId }) => {
+  // 좋아요 수와 사용자 상태 관리
+  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [userId, setUserId] = useState(null);
 
+  // 페이지 접속시 사용자 정보와 좋아요 데이터 로드
   useEffect(() => {
-    fetchLikeData();
-  }, [postId, userId]);
+    if (postId) {
+      fetchUserInfo();
+    }
+  }, [postId]);
 
-  // Supabase에서 좋아요 데이터 가져오기
-  const fetchLikeData = async () => {
-    const { data, error } = await supabase
-      .from("actions")
-      .select("*", { count: "exact" })
-      .eq("post_id", postId);
+  // 로그인된 사용자 정보 가져오기
+  const fetchUserInfo = async () => {
+    try {
+      // Supabase auth를 통해 현재 로그인된 사용자 정보 가져오기
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error(`인증 실패: ${authError?.message}`);
 
-    if (error) {
-      console.error("좋아요 데이터 불러오기 오류:", error);
+      // 사용자 ID 설정 및 좋아요 데이터 가져오기
+      setUserId(user.id);
+      fetchLikeData(user.id);
+    } catch (error) {
+      console.error(`[ERROR] 사용자 정보 로딩 실패: ${error.message}`);
+    }
+  };
+
+  // 특정 게시글의 좋아요 데이터 가져오기
+  const fetchLikeData = async (currentUserId) => {
+    try {
+      // Supabase에서 특정 게시글의 좋아요 데이터 조회
+      const { data, error } = await supabase
+        .from("actions")
+        .select("*")
+        .eq("post_id", postId);
+
+      if (error) throw new Error(`좋아요 데이터 불러오기 실패: ${error.message}`);
+
+      // 좋아요 수 설정
+      setLikeCount(data.length);
+
+      // 현재 사용자가 좋아요를 눌렀는지 확인
+      const userLike = data.some((action) => action.user_id === currentUserId);
+      setLiked(userLike);
+    } catch (error) {
+      console.error(`[ERROR] fetchLikeData 실패: ${error.message}`);
+    }
+  };
+
+  // 좋아요 버튼 클릭 시 이벤트 처리
+  const handleLike = async () => {
+    if (!userId) {
+      alert("로그인이 필요합니다!");
       return;
     }
 
-    setLikeCount(data.length);
+    try {
+      if (liked) {
+        // 사용자가 누른 좋아요 삭제
+        const { error } = await supabase
+          .from("actions")
+          .delete()
+          .eq("post_id", postId)
+          .eq("user_id", userId);
 
-    // 현재 사용자가 좋아요 눌렀는지 확인
-    const userLike = data.find((action) => action.user_id === userId);
-    setLiked(!!userLike);
-  };
+        if (error) throw new Error(`좋아요 취소 실패: ${error.message}`);
+      } else {
+        // 새로운 좋아요 추가
+        const { error } = await supabase
+          .from("actions")
+          .insert([{ post_id: postId, user_id: userId }]);
 
-  // 🔹 좋아요(함께해요) 버튼 클릭 시
-  const handleLike = async () => {
-    if (liked) {
-      // 이미 눌렀다면 삭제 (좋아요 취소)
-      const { error } = await supabase
-        .from("actions")
-        .delete()
-        .match({ post_id: postId, user_id: userId });
-
-      if (error) {
-        console.error("좋아요 취소 오류:", error);
-        return;
+        if (error) throw new Error(`좋아요 추가 실패: ${error.message}`);
       }
-      setLikeCount((prev) => prev - 1);
-    } else {
-      // 새로 추가
-      const { error } = await supabase
-        .from("actions")
-        .insert([{ post_id: postId, user_id: userId }]);
 
-      if (error) {
-        console.error("좋아요 추가 오류:", error);
-        return;
-      }
-      setLikeCount((prev) => prev + 1);
+      // 좋아요 데이터 다시 불러오기
+      fetchLikeData(userId);
+    } catch (error) {
+      console.error(`[ERROR] handleLike 실패: ${error.message}`);
     }
-
-    setLiked(!liked);
   };
 
   return (
     <LikeContainer>
-      <LikeButton onClick={handleLike} $liked={liked}>
+      <LikeButton onClick={handleLike} $liked={liked} disabled={!userId}>
         <Heart size={24} />
       </LikeButton>
       <LikeCount>{likeCount}</LikeCount>
@@ -70,6 +96,7 @@ export const DetailAction = ({ postId, userId }) => {
   );
 };
 
+// 스타일 정의
 const LikeContainer = styled.div`
   display: flex;
   align-items: center;
@@ -82,10 +109,15 @@ const LikeButton = styled.button`
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  color: ${(props) => (props.$liked ? "#ff4757" : "#999")}; // 눌렀을 때 색 변경
+  color: ${(props) => (props.$liked ? "#ff4757" : "#999")};
 
-  &:hover {
+  &:hover:enabled {
     transform: scale(1.2);
+  }
+
+  &:disabled {
+    color: #ccc;
+    cursor: not-allowed;
   }
 `;
 
@@ -94,4 +126,3 @@ const LikeCount = styled.span`
   color: #444;
   font-weight: bold;
 `;
-
