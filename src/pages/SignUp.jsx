@@ -171,43 +171,50 @@ const Signup = () => {
 
       <div className='form-div'>
         <form onSubmit={handleSignup}>
-          <label>
-            이메일:{' '}
-            <input
-              placeholder='이메일'
-              type='email'
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              required
-            />
-          </label>
-          <label>
-            비밀번호:{' '}
-            <input
-              type='password'
-              minLength={6}
-              required
-              placeholder='비밀번호'
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
-          </label>
-          <label>
-            닉네임:{' '}
-            <input
-              className='nickname-input'
-              required
-              placeholder='닉네임'
-              onChange={(e) => {
-                setNickname(e.target.value);
-              }}
-            />
-            <button type='button' onClick={handleNickname}>
-              중복 검사
-            </button>
-          </label>
+          <div>
+            <label>
+              이메일:{' '}
+              <input
+                placeholder='이메일'
+                type='email'
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                required
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              비밀번호:{' '}
+              <input
+                type='password'
+                minLength={6}
+                required
+                placeholder='비밀번호'
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              닉네임:{' '}
+              <input
+                className='nickname-input'
+                required
+                placeholder='닉네임'
+                onChange={(e) => {
+                  setNickname(e.target.value);
+                }}
+              />
+              <button type='button' onClick={handleNickname}>
+                중복 검사
+              </button>
+            </label>
+          </div>
+
           <div className='radio-select-div'>
             <div className='left-radio-div'>
               성별:
@@ -238,7 +245,7 @@ const Signup = () => {
               </label>
             </div>
             <div className='right-select-div'>
-              <label>
+              <label className='local-label'>
                 지역:
                 <select
                   value={main_location}
@@ -331,6 +338,11 @@ const StWrapper = styled.div`
 
   color: black;
 
+  div {
+    display: flex;
+    flex-direction: row;
+  }
+
   img {
     width: 100px;
     height: 100px;
@@ -339,12 +351,14 @@ const StWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     padding: 30px;
   }
 
   .form-div {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
+    width: 700px;
   }
 
   form {
@@ -354,8 +368,6 @@ const StWrapper = styled.div`
     flex-direction: column;
     font-size: 18px;
     gap: 16px;
-
-    margin-right: 30px;
   }
   input {
     flex: 1;
@@ -372,7 +384,7 @@ const StWrapper = styled.div`
     text-align: right;
   }
   .nickname-input {
-    width: 65%;
+    width: 60%;
     margin-right: 11px;
   }
 
@@ -386,7 +398,7 @@ const StWrapper = styled.div`
   }
 
   .left-radio-div {
-    width: 50%;
+    width: 45%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -396,6 +408,8 @@ const StWrapper = styled.div`
   }
   .radio-label {
     width: 30%;
+    display: flex;
+    margin-left: 5px;
   }
   .radio-select-div {
     width: 100%;
@@ -404,7 +418,7 @@ const StWrapper = styled.div`
   }
 
   .right-select-div {
-    width: 50%;
+    width: 55%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -415,14 +429,20 @@ const StWrapper = styled.div`
     width: 100px;
     margin-left: 10px;
   }
+  .select-div {
+    display: flex;
+  }
 
   .img-upload-label {
     display: flex;
-    justify-content: center; /* 가로 정렬 */
+    justify-content: center;
     text-align: center;
     width: 100%;
   }
   .title {
     margin-top: 10px;
+  }
+  .local-label {
+    display: flex;
   }
 `;
