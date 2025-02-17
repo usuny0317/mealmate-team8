@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // 패스 파라미터(디테일 페이지 열기)
 import { supabase } from '../supabase/client.js';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
@@ -14,9 +14,8 @@ export const Detail = () => {
   const [post, setPost] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  // 쿼리 스트링으로 postId 가져오기
-  const [searchParams] = useSearchParams();
-  const postId = searchParams.get('id');
+  // 패스 파라미터로 postId 가져오기
+  const { id: postId } = useParams();
 
   // 페이지 이동을 위한 navigate 함수
   const navigate = useNavigate();
@@ -93,23 +92,37 @@ export const Detail = () => {
     return <p>게시글을 불러오는 중...</p>;
   }
 
+  // 게시글 수정 버튼 클릭 이벤트
+  const handleEdit = () => {
+    // 쿼리 스트링을 사용하여 postId 전달
+    navigate(`/posteditior?id=${postId}`);
+  };
+
   // 디테일 페이지 렌더링
   return (
     <StPageContainer>
       <StArticleContainer>
-        {/* 게시글 제목 표시 */}
-        <StTitle>{post.post_title}</StTitle>
+        {/* 게시글 제목 및 수정 버튼 */}
+        <StTitleContainer>
+          <StTitle>{post.post_title}</StTitle>
+        </StTitleContainer>
 
         {/* 작성자 정보 표시 */}
         <StAuthorInfo>
           작성자: {post.author_name} ·{' '}
           {dayjs(post.created_at).format('YYYY년 MM월 DD일 HH시 mm분')}
+          <EditButton onClick={handleEdit}>수정</EditButton>
         </StAuthorInfo>
 
         {/* 게시글 이미지 표시 */}
-        {post.post_img_url && (
+        {/* 게시글 이미지 표시 */}
+        {post.post_img_url ? (
           <StImageContainer>
-            <img src={post.post_img_url} alt='게시글 이미지' />
+            <img src={post.post_img_url || null} alt='게시글 이미지' />
+          </StImageContainer>
+        ) : (
+          <StImageContainer>
+            <img src='/default-image.png' alt='기본 이미지' />
           </StImageContainer>
         )}
 
@@ -155,12 +168,34 @@ const StArticleContainer = styled.div`
   line-height: 1.8;
 `;
 
+// 제목 및 수정 버튼 컨테이너
+const StTitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
 // 제목 스타일링
 const StTitle = styled.h1`
   font-size: 32px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20px;
+`;
+
+// 수정 버튼 스타일링
+const EditButton = styled.button`
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #357ab7;
+  }
 `;
 
 // 작성자 정보 스타일링
