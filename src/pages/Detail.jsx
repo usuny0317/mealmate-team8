@@ -24,7 +24,7 @@ export const Detail = () => {
   // AuthContext를 통해 로그인 상태 가져오기
   const { isLogin } = useContext(AuthContext);
 
-  // 스위트 알러트를 사용하기 위한 alert 함수
+  // swal을 사용하기 위한 alert 함수
   const errorAlert = alert();
 
   // 디테일 페이지 접속시 로그인 상태 확인
@@ -44,60 +44,64 @@ export const Detail = () => {
     return null;
   }
 
-  // 🔍 로그인된 사용자 ID와 닉네임 동시 가져오기
+  // 로그인된 사용자 ID와 닉네임 동시 가져오기
   useEffect(() => {
+    let isMounted = true;
+  
     const fetchUserData = async () => {
       try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-        if (error || !user) throw new Error('사용자 인증 실패');
-
-        const { data: userData, error: userError } = await supabase
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!isMounted) return;
+  
+        const { data: userData } = await supabase
           .from('users')
           .select('id, nick_name')
           .eq('id', user.id)
           .single();
-
-        if (userError) throw new Error('유저 데이터 가져오기 실패');
-
-        // userId와 userNickName 한 번에 설정
-        setUserId(userData.id);
-        setUserNickName(userData.nick_name);
+  
+        if (userData && isMounted) {
+          setUserId(userData.id);
+          setUserNickName(userData.nick_name);
+        }
       } catch (error) {
         console.error('유저 데이터 가져오기 실패:', error.message);
       }
     };
+    
     fetchUserData();
+  
+    return () => { isMounted = false }; // 컴포넌트 언마운트 시 fetch 중단
   }, []);
 
   // 게시글 데이터 가져오기
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('id', postId)
-          .single();
+  // errorAlert 함수가 alert() 함수로 매 렌더링마다 새로 생성되기 때문에 alert()를 컴포넌트 함수 바깥에 정의
+const globalAlert = alert;
 
-        if (error) throw error;
+useEffect(() => {
+  const fetchPost = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
+        .single();
 
-        setPost(data);
-      } catch (error) {
-        errorAlert({
+      if (error) {
+        globalAlert({
           type: ALERT_TYPE.ERROR,
           content: '게시글을 불러오는 중 오류가 발생했습니다.',
         });
-        console.error('게시글 가져오기 오류:', error);
+        return;
       }
-    };
 
-    if (postId) {
-      fetchPost();
+      setPost(data);
+    } catch (error) {
+      console.error('게시글 가져오기 실패:', error.message);
     }
-  }, [postId, errorAlert]);
+  };
+
+  if (postId) fetchPost();
+}, [postId]); // 의존성 배열을 postId 하나로만 유지
 
   // 데이터 로딩 중 표시할 내용
   if (!post) {
@@ -106,7 +110,7 @@ export const Detail = () => {
 
   // 게시글 수정 버튼 클릭 이벤트
   const handleEdit = () => {
-    navigate(`/posteditior?id=${postId}`);
+    navigate(`/posteditior/${postId}`);
   };
 
   // 게시글 삭제 버튼 클릭 이벤트
@@ -157,7 +161,7 @@ export const Detail = () => {
           </StImageContainer>
         ) : (
           <StImageContainer>
-            <img src='/default-image.png' alt='기본 이미지' />
+            <img src='https://media.istockphoto.com/id/1955214946/ko/%EC%82%AC%EC%A7%84/empty-plate.jpg?s=1024x1024&w=is&k=20&c=nexrG1-O4Ba7xZHAQDZNDkAauctjAseD0BoYDJGWOJU=' alt='기본 이미지' />
           </StImageContainer>
         )}
 
@@ -270,8 +274,8 @@ const StImageContainer = styled.div`
   margin-bottom: 20px;
   img {
     width: 100%;
-    height: auto;
-    max-height: 450px;
+    height: 100%;
+    max-height: 650px;
     border-radius: 6px;
   }
 `;
