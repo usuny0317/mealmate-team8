@@ -104,6 +104,9 @@ export const EditProfile = () => {
       }
     }
 
+    setImagePreview('');
+    setSelectedFile('');
+
     //페이지가 새로고침될때 세션스토리지에서 user정보를 가져오기 때문에 세션스토리지도 변경
     sessionStorage.setItem('loggedInUser', JSON.stringify(...data));
 
