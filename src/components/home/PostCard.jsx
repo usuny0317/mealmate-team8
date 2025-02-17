@@ -1,16 +1,32 @@
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { TbBowlSpoonFilled } from 'react-icons/tb';
+
+const EndPost = () => {
+  return (
+    <div id='endPostWrapper'>
+      <div id='endPost'>
+        <img width='250px' src='/src/assets/deadline.png' alt='end' />
+      </div>
+    </div>
+  );
+};
+
 function PostCard({ postData }) {
   const navigate = useNavigate();
+  const isClosedPost = useMemo(
+    () => Number(postData.post_rec_cnt) - postData.actions.length === 0,
+    [postData.post_rec_cnt, postData.actions.length]
+  );
 
   const moveToMyPage = (targetNickname) => {
     navigate(`/user-posts/${targetNickname}`);
   };
 
   const moveToDetail = (targetId) => {
+    if (isClosedPost) return;
     navigate(`/detail/${targetId}`);
   };
 
@@ -20,7 +36,7 @@ function PostCard({ postData }) {
   };
 
   return (
-    <StPostCardWrapper>
+    <StPostCardWrapper bgColor={isClosedPost ? 'rgba(0, 0, 0, 0.9)' : 'none'}>
       <p className='context'>
         <img
           className='profile'
@@ -32,11 +48,14 @@ function PostCard({ postData }) {
         />
         <span>{postData.author_name}</span>
       </p>
-      <div className='cardContent' onClick={() => moveToDetail(postData.id)}>
+      <div
+        className={isClosedPost ? null : 'cardContent'}
+        onClick={() => moveToDetail(postData.id)}
+      >
         <p className='smallText'>
           작성시간 : {dayjs(postData.created_at).format('YYYY-MM-DD HH:mm')}
         </p>
-        <p className='postImage'>
+        <p className={isClosedPost ? 'closedImage' : 'postImage'}>
           <img
             width='100%'
             height='200px'
@@ -61,6 +80,7 @@ function PostCard({ postData }) {
           {lastOne(postData.post_rec_cnt, postData.actions.length)}
         </p>
       </div>
+      {isClosedPost && <EndPost />}
     </StPostCardWrapper>
   );
 }
@@ -76,6 +96,15 @@ const StPostCardWrapper = styled.section`
   border-radius: 5px;
   box-shadow: 1px 2px 1px #eaeaea;
   border: 1px solid ${({ theme }) => theme.colors.bgDark};
+  background-color: ${(props) => props.bgColor};
+  position: relative;
+
+  #endPost {
+    z-index: 100;
+    position: absolute;
+    top: calc(50% - 81px);
+    left: calc(50% - 125px);
+  }
   .cardContent {
     cursor: pointer;
   }
@@ -98,9 +127,15 @@ const StPostCardWrapper = styled.section`
   }
   .postImage {
     text-align: center;
-    object-fit: contain;
     img {
       object-fit: cover;
+    }
+  }
+  .closedImage {
+    text-align: center;
+    img {
+      object-fit: cover;
+      opacity: 0.1;
     }
   }
   h4 {
