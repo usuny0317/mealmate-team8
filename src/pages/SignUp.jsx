@@ -8,6 +8,10 @@ import { ALERT_TYPE } from '../constants/alertConstant';
 
 //회원가입페이지지
 const Signup = () => {
+  //이미지 도전
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const defalt_img = '/user.png';
   //값 보내주고 관리하기 위한 state
   //일단 작성하고 나중에 묶을까 생각 중입니다.
   const [email, setEmail] = useState('');
@@ -16,13 +20,7 @@ const Signup = () => {
   const [gender, setGender] = useState(true);
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
-  const [profile, setProfile] = useState(
-    'https://cdn-icons-png.flaticon.com/512/7542/7542670.pnghttps://png.pngtree.com/png-vector/20190411/ourmid/pngtree-vector-business-men-icon-png-image_925963.jpg'
-  );
-
-  //이미지 도전
-  const fileInputRef = useRef(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [profile, setProfile] = useState(defalt_img);
 
   const [check, setCheck] = useState(false);
   //셀렉트 박스 전용
@@ -138,21 +136,12 @@ const Signup = () => {
   //이미지 핸들러
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
-      if (selectedFile.type !== 'image/jpeg' || fileExtension !== 'jpg') {
-        SignupAlert({
-          type: ERROR,
-          content: '허용된 이미지 파일(.jpg)만 가능!',
-        });
-        return;
-      }
-      setProfile(selectedFile);
-      const fileURL = URL.createObjectURL(selectedFile);
-      setImagePreview(fileURL);
-      //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
-      //스토리지 > url 가져와서 테이블에 저장
-    }
+
+    setProfile(selectedFile);
+    const fileURL = URL.createObjectURL(selectedFile);
+    setImagePreview(fileURL);
+    //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
+    //스토리지 > url 가져와서 테이블에 저장
   };
 
   const handleDeletImg = (e) => {
