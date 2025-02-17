@@ -17,7 +17,7 @@ const getPlaceholder = (category) => {
 const categoryOptions = [
   {
     name: '메뉴',
-    value: '', //@TODO: 추가해야함
+    value: 'post_menu',
   },
   {
     name: '장소',
@@ -31,7 +31,7 @@ const categoryOptions = [
 
 export default function SearchField({ setSearchField, setPage }) {
   const searchText = useRef(''); // 검색 텍스트(input)
-  const [category, setCategory] = useState(''); // 검색 기준 (selectBox)
+  const [category, setCategory] = useState(categoryOptions[0].value); // 검색 기준 (selectBox)
   const placeholder = useMemo(() => getPlaceholder(category), [category]); // placeholder 문구
 
   const handleSearch = () => {
