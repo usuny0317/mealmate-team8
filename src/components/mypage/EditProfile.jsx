@@ -24,6 +24,7 @@ export const EditProfile = () => {
   });
 
   const editProfileHandler = async () => {
+    //입력된 정보가 없을때 뜨는 알럿
     if (
       JSON.stringify({ ...loggedInUser, ...userData }) ===
       JSON.stringify(loggedInUser)
@@ -34,11 +35,15 @@ export const EditProfile = () => {
       });
       return;
     }
+
+    //서버에 데이터업데이트후 업데이트된 데이터 가져오기
     const { data, error } = await supabase
       .from('users')
       .update(userData)
       .eq('id', loggedInUser.id)
       .select('*');
+
+    //똑같은 닉네임이 user테이블에 등록되어 있을때
     if (error?.code === '23505') {
       errorAlert({
         type: ERROR,
@@ -46,6 +51,8 @@ export const EditProfile = () => {
       });
       return;
     }
+
+    //이상한 요청을 보내서 데이터에 null값이 들어올때
     if (data === null) {
       errorAlert({
         type: ERROR,
@@ -53,8 +60,11 @@ export const EditProfile = () => {
       });
       return;
     }
+
     //페이지가 새로고침될때 세션스토리지에서 user정보를 가져오기 때문에 세션스토리지도 변경
     sessionStorage.setItem('loggedInUser', JSON.stringify(...data));
+
+    //context로 관리중인 유저정보 바뀐정보로 동기화
     setLoggedInUser(...data);
     errorAlert({
       type: SUCCESS,
