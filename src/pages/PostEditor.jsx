@@ -13,6 +13,9 @@ const PostEditor = () => {
   const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
   const navigate = useNavigate();
   const alertConsole = alert();
+  const MY_NICK_NAME = JSON.parse(
+    sessionStorage.getItem('loggedInUser')
+  ).nick_name;
   // 게시글 정보 상태
   const [formData, setFormData] = useState({
     title: '',
@@ -27,47 +30,6 @@ const PostEditor = () => {
   const [imagePreview, setImagePreview] = useState(''); // 이미지 미리보기 상태
   const fileInputRef = useRef(null); // 파일 입력 필드 접근을 위한 ref
   const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 }); // 지도의 위치값 상태
-  // const KAKAO_MAP_API_KEY = import.meta.env.VITE_APP_KAKAO_KEY;
-
-  // 카카오 맵 스크립트 추가
-  // useEffect(() => {
-  //   const mapScript = document.createElement('script');
-  //   mapScript.type = 'text/javascript';
-  //   mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_API_KEY}&libraries=services,clusterer`;
-  //   mapScript.async = true;
-
-  //   document.head.appendChild(mapScript);
-
-  //   return () => {
-  //     document.head.removeChild(mapScript);
-  //   };
-  // }, []);
-
-  // 다음 주소 검색 api
-  useEffect(() => {
-    let postcodeScript = null;
-
-    const loadPostcodeScript = () => {
-      postcodeScript = document.createElement('script');
-      postcodeScript.src =
-        '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-      postcodeScript.async = true;
-
-      document.head.appendChild(postcodeScript);
-
-      return new Promise((resolve) => {
-        postcodeScript.onload = resolve;
-      });
-    };
-
-    loadPostcodeScript().catch(console.error);
-
-    return () => {
-      if (postcodeScript && document.head.contains(postcodeScript)) {
-        document.head.removeChild(postcodeScript);
-      }
-    };
-  }, []);
 
   // 엔터 키 눌림 방지 함수
   const handleKeyDown = (e) => {
@@ -271,7 +233,7 @@ const PostEditor = () => {
         post_img_url: fileUrl,
         created_at: getKoreanTime(),
         updated_at: null,
-        author_name: '장현빈',
+        author_name: MY_NICK_NAME,
         meeting_date: date,
         post_menu: menu,
       };
