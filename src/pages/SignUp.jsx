@@ -5,6 +5,7 @@ import { supabase } from '../supabase/client';
 
 import { alert } from '../utils/alert';
 import { ALERT_TYPE } from '../constants/alertConstant';
+import styled from 'styled-components';
 
 //회원가입페이지지
 const Signup = () => {
@@ -162,10 +163,13 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <div>로고 이미지 자리</div>
-      <div>회원가입 타이틀 자리</div>
-      <div>
+    <StWrapper>
+      <div className='img-div'>
+        <img src='/mm_logo.svg' />
+        <div className='title'>회원가입</div>
+      </div>
+
+      <div className='form-div'>
         <form onSubmit={handleSignup}>
           <label>
             이메일:{' '}
@@ -193,6 +197,7 @@ const Signup = () => {
           <label>
             닉네임:{' '}
             <input
+              className='nickname-input'
               required
               placeholder='닉네임'
               onChange={(e) => {
@@ -203,87 +208,87 @@ const Signup = () => {
               중복 검사
             </button>
           </label>
-          <label>
-            성별:
-            <label>
-              남성
-              <input
-                type='radio'
-                value={true}
-                name='gender'
-                defaultChecked
-                onChange={() => {
-                  setGender(true);
-                }}
-              />
-            </label>
-            <label>
-              여성
-              <input
-                type='radio'
-                value={false}
-                name='gender'
-                onChange={() => {
-                  setGender(false);
-                }}
-              />
-            </label>
-          </label>
-          <br />
-          {
-            //아래 지역부분을 component로 바꿔서 태진님이랑 공유하기
-          }
-          <label>
-            지역:
-            <select
-              value={main_location}
-              className='main_location'
-              onChange={(e) => {
-                const selectedValue = e.target.value;
-                setMain_location(selectedValue);
-              }}
-            >
-              {mainselect.map((main) => {
-                return (
-                  <option value={main} key={main}>
-                    {main}
-                  </option>
-                );
-              })}
-            </select>
-            <select
-              value={sub_location}
-              className='sub_location'
-              onChange={(e) => {
-                setSub_location(e.target.value);
-              }}
-            >
-              {
-                //배열인지 확인, 배열일 때만 동작하게 && 사용.
-                Array.isArray(get_sub) &&
-                  get_sub.map((sub) => {
+          <div className='radio-select-div'>
+            <div className='left-radio-div'>
+              성별:
+              <label className='radio-label'>
+                남성
+                <input
+                  className='radio-input'
+                  type='radio'
+                  value={true}
+                  name='gender'
+                  defaultChecked
+                  onChange={() => {
+                    setGender(true);
+                  }}
+                />
+              </label>
+              <label className='radio-label'>
+                여성
+                <input
+                  className='radio-input'
+                  type='radio'
+                  value={false}
+                  name='gender'
+                  onChange={() => {
+                    setGender(false);
+                  }}
+                />
+              </label>
+            </div>
+            <div className='right-select-div'>
+              <label>
+                지역:
+                <select
+                  value={main_location}
+                  className='main_location'
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    setMain_location(selectedValue);
+                  }}
+                >
+                  {mainselect.map((main) => {
                     return (
-                      <option value={sub} key={sub}>
-                        {sub}
+                      <option value={main} key={main}>
+                        {main}
                       </option>
                     );
-                  })
-              }
-            </select>
-          </label>
-          <label>
+                  })}
+                </select>
+                <select
+                  value={sub_location}
+                  className='sub_location'
+                  onChange={(e) => {
+                    setSub_location(e.target.value);
+                  }}
+                >
+                  {
+                    //배열인지 확인, 배열일 때만 동작하게 && 사용.
+                    Array.isArray(get_sub) &&
+                      get_sub.map((sub) => {
+                        return (
+                          <option value={sub} key={sub}>
+                            {sub}
+                          </option>
+                        );
+                      })
+                  }
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <label className='img-upload-label'>
             프로필:
             <div>
-              <div htmlFor='inputFile'>
-                클릭하여 이미지 선택
-                <input
-                  type='file'
-                  id='inputFile'
-                  accept='image/*'
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                />
-              </div>
+              <input
+                type='file'
+                id='inputFile'
+                accept='image/*'
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
             </div>
             {imagePreview && (
               <div>
@@ -313,8 +318,111 @@ const Signup = () => {
           </button>
         </form>
       </div>
-    </div>
+    </StWrapper>
   );
 };
 
 export default Signup;
+
+const StWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  color: black;
+
+  img {
+    width: 100px;
+    height: 100px;
+  }
+  .img-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+  }
+
+  .form-div {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  form {
+    border: 2px solid #000000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+    gap: 16px;
+
+    margin-right: 30px;
+  }
+  input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: calc(100% - 110px); /* input이 남은 공간 채우기 */
+    box-sizing: border-box;
+    margin-left: 10px;
+  }
+  form label {
+    width: 100%;
+    text-align: right;
+  }
+  .nickname-input {
+    width: 65%;
+    margin-right: 11px;
+  }
+
+  button {
+    background-color: ${({ theme }) => theme.colors.primaryLight};
+    color: white;
+    border-radius: 3px;
+    font-weight: bold;
+    padding: 5px;
+    margin: 2px;
+  }
+
+  .left-radio-div {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .radio-input {
+    width: 30px;
+  }
+  .radio-label {
+    width: 30%;
+  }
+  .radio-select-div {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .right-select-div {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+  }
+
+  select {
+    width: 100px;
+    margin-left: 10px;
+  }
+
+  .img-upload-label {
+    display: flex;
+    justify-content: center; /* 가로 정렬 */
+    text-align: center;
+    width: 100%;
+  }
+  .title {
+    margin-top: 10px;
+  }
+`;
