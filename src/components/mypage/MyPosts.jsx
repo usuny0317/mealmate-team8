@@ -16,15 +16,12 @@ export const MyPosts = () => {
   //sweet alert
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
-
   useEffect(() => {
     const getPostsByUserNickName = async () => {
-      //전역에설정되어있는 auth의 uid로 닉네임을 불러오는 요청
-
       //받아온 닉네임을 기준으로 포스트리스트에서  가져오기
       const { data, errorGetPosts } = await supabase
         .from('posts')
-        .select('*, users!inner(profile)')
+        .select('*, users!inner(profile) ,actions(*)')
         .eq('author_name', loggedInUser.nick_name);
       setPosts(data);
       if (errorGetPosts)
