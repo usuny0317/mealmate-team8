@@ -25,7 +25,7 @@ const UserPosts = () => {
     const getPosts = async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select('*, users!inner(profile)')
         .eq('author_name', userNickname);
       setPosts(data);
 
