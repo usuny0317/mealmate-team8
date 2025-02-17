@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { main_select, get_sub_select } from '../constants/signUpSelector';
 import { supabase } from '../supabase/client';
@@ -17,8 +17,13 @@ const Signup = () => {
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
   const [profile, setProfile] = useState(
-    'https://www.icreta.com/files/attach/images/319/275/055/8e2c1590a474a9afb78c4cb23a9af5b2.jpg'
+    'https://cdn-icons-png.flaticon.com/512/7542/7542670.pnghttps://png.pngtree.com/png-vector/20190411/ourmid/pngtree-vector-business-men-icon-png-image_925963.jpg'
   );
+
+  //이미지 도전
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState('');
+
   const [check, setCheck] = useState(false);
   //셀렉트 박스 전용
   const mainselect = main_select;
@@ -65,7 +70,7 @@ const Signup = () => {
     }
   };
 
-  //로그인 핸들러
+  //회원가입입 핸들러
   const handleSignup = async (e) => {
     e.preventDefault();
     //수파 베이스 연결 시도하기기
@@ -109,6 +114,32 @@ const Signup = () => {
         content: '회원가입에 실패했습니다!!' + error,
       });
     }
+  };
+
+  //이미지 핸들러
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+      if (selectedFile.type !== 'image/jpeg' || fileExtension !== 'jpg') {
+        SignupAlert({
+          type: ERROR,
+          content: '허용된 이미지 파일(.jpg)만 가능!',
+        });
+        return;
+      }
+      setProfile(selectedFile);
+      const fileURL = URL.createObjectURL(selectedFile);
+      setImagePreview(fileURL);
+      //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
+      //스토리지 > url 가져와서 테이블에 저장
+    }
+  };
+
+  const handleDeletImg = (e) => {
+    e.stopPropagation();
+    setProfile('');
+    setImagePreview('');
   };
 
   return (
@@ -222,13 +253,33 @@ const Signup = () => {
             </select>
           </label>
           <label>
-            프로필: <button type='button'>추가</button>{' '}
-            <button type='button'>삭제</button>
+            프로필:
+            <div>
+              <div htmlFor='inputFile'>
+                클릭하여 이미지 선택
+                <input
+                  type='file'
+                  id='inputFile'
+                  accept='image/*'
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+            {imagePreview && (
+              <div>
+                {' '}
+                <img src={imagePreview} alt='이미지 미리보기' />
+              </div>
+            )}
+            <button type='button' onClick={handleDeletImg}>
+              이미지 삭제
+            </button>
           </label>
           <button
             type='submit'
             onClick={() => {
-              console.log('' + main_location + ' ' + sub_location);
+              console.log('' + profile);
             }}
           >
             가입하기
