@@ -1,34 +1,28 @@
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-export default function PostCard({ postData }) {
+function PostCard({ postData }) {
   const navigate = useNavigate();
-  useEffect(() => {
-    //TODO:
-    // 1. 해당 유저의 id값으로 user 정보 받아오기
-    // 2. 받아온 유저 정보의 nickname, profile로 글쓴이 세팅해주기
-  }, []);
 
-  const moveToDetail = (id) => {
-    navigate(`/detail?id=${id}`);
+  const moveToMyPage = (targetNickname) => {
+    navigate(`/user-posts/${targetNickname}`);
   };
-  const moveToMyPage = () => {
-    navigate('/mypage');
+
+  const moveToDetail = (targetId) => {
+    navigate(`/detail?id=${targetId}`);
   };
 
   return (
-    <PostCardWrapper>
+    <StPostCardWrapper>
       <p className='context'>
-        {/* TODO:
-          로그인 user정보 받아온 다음 user에 대한 profile 받아서 img에 넣어주기 
-        */}
         <img
           className='profile'
-          onClick={moveToMyPage}
-          width='50px'
-          src='https://contents.creators.mypetlife.co.kr/content/uploads/2020/03/20175706/202003202Faf7a5a92a45c71f76391883a3e3ac572.jpg'
+          onClick={() => moveToMyPage(postData.author_name)}
+          width='40px'
+          height='40px'
+          src={postData.users.profile}
           alt='user_profile'
         />
         <span>{postData.author_name}</span>
@@ -53,11 +47,13 @@ export default function PostCard({ postData }) {
         </p>
         <p className='context'>n명/{postData.post_rec_cnt}</p>
       </div>
-    </PostCardWrapper>
+    </StPostCardWrapper>
   );
 }
 
-const PostCardWrapper = styled.section`
+export default React.memo(PostCard);
+
+const StPostCardWrapper = styled.section`
   flex: 1 1 300px;
   max-width: 300px;
   box-sizing: border-box;
@@ -86,7 +82,6 @@ const PostCardWrapper = styled.section`
       object-fit: cover;
     }
   }
-
   h4 {
     font-weight: bold;
     font-size: 1.2rem;

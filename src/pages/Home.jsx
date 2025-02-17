@@ -9,26 +9,32 @@ import { alert } from '../utils/alert';
 import { ImSpoonKnife } from 'react-icons/im';
 import { useNavigate } from 'react-router-dom';
 const { ERROR } = ALERT_TYPE;
-//메인 페이지
+
 const Home = () => {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // 서버에서 받아온 게시글 리스트
+
+  // 메인 페이지 진입 시 서버에서 모든 post 데이터 요청
   useEffect(() => {
     const errorAlert = alert();
     const getPosts = async () => {
-      const { data, error } = await supabase.from('posts').select('*');
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, users!inner(profile)'); //TODO: users객체가 전체로 오고있는데 profile만 뽑아오도록 수정할 것
       if (error) {
         errorAlert({ type: ERROR, content: '오류가 발생했습니다.' });
         throw error;
       }
       setPosts(data);
     };
-
     getPosts();
   }, []);
+
+  // 게시글 등록 페이지로 이동
   const moveToPostBoard = () => {
     navigate('/posteditior');
   };
+
   return (
     <StHomeWrapper>
       <article id='home'>
@@ -57,7 +63,7 @@ const Home = () => {
 export default Home;
 const StHomeWrapper = styled.div`
   #home {
-    padding-top: 10vh;
+    padding: 10vh 0;
     width: 80vw;
     margin: 0 auto;
     min-width: 300px;
