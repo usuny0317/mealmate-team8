@@ -31,7 +31,7 @@ export const MyPosts = () => {
       //받아온 닉네임을 기준으로 포스트리스트에서  가져오기
       const { data, errorGetPosts } = await supabase
         .from('posts')
-        .select('*')
+        .select('*, users!inner(profile)')
         .eq('author_name', targetUser.nick_name);
       setPosts(data);
 
