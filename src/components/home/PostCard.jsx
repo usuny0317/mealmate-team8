@@ -22,6 +22,7 @@ function PostCard({ postData }) {
   );
 
   const moveToMyPage = (targetNickname) => {
+    if (isClosedPost) return;
     navigate(`/user-posts/${targetNickname}`);
   };
 
@@ -37,9 +38,9 @@ function PostCard({ postData }) {
 
   return (
     <StPostCardWrapper bgColor={isClosedPost ? 'rgba(0, 0, 0, 0.9)' : 'none'}>
-      <p className='context'>
+      <p className={isClosedPost ? 'closedImage' : 'context'}>
         <img
-          className='profile'
+          className={isClosedPost ? 'noCursor' : 'profile'}
           onClick={() => moveToMyPage(postData.author_name)}
           width='40px'
           height='40px'
@@ -117,7 +118,7 @@ const StPostCardWrapper = styled.section`
     display: flex;
     align-items: center;
   }
-  .context > .profile {
+  .profile {
     margin-right: 15px;
     border-radius: 50%;
     cursor: pointer;
@@ -132,7 +133,9 @@ const StPostCardWrapper = styled.section`
     }
   }
   .closedImage {
-    text-align: center;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
     img {
       object-fit: cover;
       opacity: 0.1;
@@ -150,5 +153,10 @@ const StPostCardWrapper = styled.section`
   .smallText {
     font-size: 0.8rem;
     margin-bottom: 5px;
+  }
+  .noCursor {
+    margin-right: 15px;
+    border-radius: 50%;
+    cursor: default;
   }
 `;
