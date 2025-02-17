@@ -55,7 +55,32 @@ const PostEditor = () => {
     const fetchPostData = async () => {
       const postData = await getPostById(postId);
       if (postData) {
-        // 데이터 매핑
+        // 이미지 처리 부분 추가
+        let fileObject = null;
+        if (postData.post_img_url) {
+          try {
+            // 스토리지에서 이미지 다운로드
+            const imagePath = postData.post_img_url.split('/public/').pop();
+            const { data, error } = await supabase.storage
+              .from('post-images')
+              .download(`public/${imagePath}`);
+
+            if (error) throw error;
+
+            // Blob을 File 객체로 변환
+            const file = new File([data], imagePath, {
+              type: data.type,
+              lastModified: new Date().getTime(),
+            });
+
+            fileObject = file;
+            setImagePreview(URL.createObjectURL(file)); // 미리보기 갱신
+          } catch (error) {
+            console.error('이미지 로드 실패:', error);
+          }
+        }
+
+        // 데이터 매핑 시 File 객체 포함
         setFormData({
           title: postData.post_title,
           content: postData.post_content,
@@ -63,12 +88,11 @@ const PostEditor = () => {
           numberOfPeople: postData.post_rec_cnt,
           location: postData.post_location,
           menu: postData.post_menu,
-          file: postData.post_img_url, // 파일은 새로 업로드해야 함
+          file: fileObject,
+          created_at: postData.created_at,
         });
-
-        // 기존 이미지 미리보기 설정
-        if (postData.post_img_url) {
-          setImagePreview(postData.post_img_url);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''; // 수정 모드 시 파일 인풋 값 리셋
         }
       }
     };
@@ -277,12 +301,12 @@ const PostEditor = () => {
       }
       // 파일 삭제된 경우 (이 조건문을 별도로 분리)
       else if (file === null) {
-        // 기존 이미지 삭제
-        if (typeof formData.file === 'string') {
-          const oldFilePath = formData.file.split('/public/').pop();
+        // 기존 이미지 삭제 시 postId 확인 추가
+        if (postId && formData.file instanceof File) {
+          const oldFilePath = formData.file.name;
           await supabase.storage
             .from('post-images')
-            .remove([`public/${oldFilePath}`]);
+            .remove([`public/uploads/${oldFilePath}`]);
         }
         fileUrl = null;
       }
@@ -465,7 +489,7 @@ const PostEditor = () => {
                     id='inputFile'
                     accept='image/*'
                     ref={fileInputRef}
-                    required
+                    required={!postId}
                     onChange={handleFileChange}
                   />
                 </StFileUploadLabel>
