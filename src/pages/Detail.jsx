@@ -279,7 +279,7 @@ const StImageContainer = styled.div`
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: auto;
     border-radius: 8px;
   }
 `;
@@ -302,9 +302,9 @@ const StExtraInfo = styled.div`
   margin-top: 20px;
 `;
 
+// 함께해요 버튼 설명
 const StActionNotice = styled.p`
   font-size:20px;
-  
 `;
 
 export default Detail;
