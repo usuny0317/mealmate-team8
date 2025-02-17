@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { ImSpoonKnife } from 'react-icons/im';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,6 +9,7 @@ import { ALERT_TYPE } from '../constants/alertConstant';
 import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
 import { removeAllBlank } from '../utils/trimText';
+import AuthContext from '../context/AuthContext';
 const { ERROR } = ALERT_TYPE;
 
 const postsPerPage = 12; // 한 페이지 당 보일 게시글의 개수
@@ -22,6 +23,7 @@ const Home = () => {
     searchCategory: '',
     searchText: '',
   }); // searchCategory : 검색 기준 (selectBox) , searchText : 검색 내용 (inputBox)
+  const { isLogin } = useContext(AuthContext);
 
   const totalPages = useMemo(
     () => Math.ceil(totalPosts / postsPerPage),
@@ -78,7 +80,15 @@ const Home = () => {
 
   // 게시글 등록 페이지로 이동
   const moveToPostBoard = () => {
-    navigate('/posteditior');
+    if (isLogin) navigate('/posteditior');
+    else {
+      alert()({
+        type: ERROR,
+        content: '먼저 로그인을 해주세요.',
+      }).then((res) => {
+        if (res.isConfirmed) navigate('/login');
+      });
+    }
   };
 
   return (
