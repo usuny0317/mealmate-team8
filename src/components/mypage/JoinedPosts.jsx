@@ -21,7 +21,7 @@ export const JoinedPosts = () => {
       //받아온 닉네임을 기준으로 포스트리스트에서  가져오기
       const { data, errorGetPosts } = await supabase
         .from('actions')
-        .select('posts(*, users!inner(profile))')
+        .select('posts(*, users!inner(profile),actions(*))')
         .eq('user_id', loggedInUser.id);
 
       //받아온 데이터를 카드 컴포넌트에 맞게 가공
