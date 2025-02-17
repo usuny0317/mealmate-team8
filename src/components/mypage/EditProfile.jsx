@@ -64,57 +64,60 @@ export const EditProfile = () => {
 
   return (
     <StEditProfileWrapper>
-      <div>
-        <div className='logged-user-info'>
-          <div>
-            <img src={userData.profile} width='300px' />
-          </div>
-          <div>
-            <label htmlFor='nickname'>변경할 닉네임 : </label>
-            <input
-              type='text'
-              value={userData.nick_name}
-              onChange={(e) => {
-                setUserData({ ...userData, nick_name: e.target.value });
-              }}
-            />
-          </div>
-
-          <div>
-            지역:
-            <select
-              value={userData.main_location}
-              className='main_location'
-              onChange={(e) => {
-                setUserData({ ...userData, main_location: e.target.value });
-              }}
-            >
-              {main_select.map((main) => {
-                return (
-                  <option value={main} key={main}>
-                    {main}
-                  </option>
-                );
-              })}
-            </select>
-            <select
-              value={userData.sub_location}
-              className='sub_location'
-              onChange={(e) => {
-                setUserData({ ...userData, sub_location: e.target.value });
-              }}
-            >
-              {sub_select[userData.main_location]?.map((sub) => {
-                return (
-                  <option value={sub} key={sub}>
-                    {sub}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <span>성별 : {userData.gender ? '남자' : '여자'}</span>
+      <div className='logged-user-info'>
+        <div>
+          <img src={userData.profile} width='300px' />
         </div>
+        <div>
+          <label htmlFor='nickname'>
+            변경할 닉네임 <br />
+          </label>
+          <input
+            type='text'
+            value={userData.nick_name}
+            onChange={(e) => {
+              setUserData({ ...userData, nick_name: e.target.value });
+            }}
+          />
+        </div>
+
+        <div>
+          지역
+          <br />
+          <select
+            value={userData.main_location}
+            className='main_location'
+            onChange={(e) => {
+              setUserData({ ...userData, main_location: e.target.value });
+            }}
+          >
+            {main_select.map((main) => {
+              return (
+                <option value={main} key={main}>
+                  {main}
+                </option>
+              );
+            })}
+          </select>
+          <select
+            value={userData.sub_location}
+            className='sub_location'
+            onChange={(e) => {
+              setUserData({ ...userData, sub_location: e.target.value });
+            }}
+          >
+            {sub_select[userData.main_location]?.map((sub) => {
+              return (
+                <option value={sub} key={sub}>
+                  {sub}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        <div>성별: {userData.gender ? '남자' : '여자'}</div>
+
         <div>
           <button onClick={editProfileHandler}>수정하기</button>
         </div>
@@ -124,20 +127,64 @@ export const EditProfile = () => {
 };
 
 const StEditProfileWrapper = styled.div`
-  background-color: green;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 70vh;
   display: flex;
   justify-content: center;
   align-items: center;
   .logged-user-info {
+    width: 50%;
     display: flex;
     flex-direction: column;
+    gap: 30px;
   }
   .logged-user-info img {
     border-radius: 50%;
     object-fit: cover;
     aspect-ratio: 1 / 1;
     width: 200px;
+  }
+  input {
+    width: 150px;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+  }
+
+  input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+  select {
+    width: 150px;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #fff;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+  }
+
+  select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+  button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+
+  button:hover {
+    background-color: #0056b3;
   }
 `;
