@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { alert } from '../utils/alert';
@@ -30,6 +30,50 @@ const PostEditor = () => {
   const [imagePreview, setImagePreview] = useState(''); // 이미지 미리보기 상태
   const fileInputRef = useRef(null); // 파일 입력 필드 접근을 위한 ref
   const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 }); // 지도의 위치값 상태
+  const postId = useParams(); // 가져올 게시글 ID
+
+  // 게시글의 id와 일치한 데이터 가져오기
+  const getPostById = async (postId) => {
+    const { data, error } = await supabase
+      .from('posts') // 테이블명
+      .select('*') // 모든 컬럼 선택
+      .eq('id', postId) // 특정 ID 값과 같은 row 가져오기
+      .single(); // 단일 row만 가져오기
+
+    if (error) {
+      console.error('게시글 가져오기 실패:', error);
+      return null;
+    }
+
+    return data; // 가져온 row 반환
+  };
+
+  useEffect(() => {
+    if (!postId) return;
+
+    const fetchPostData = async () => {
+      const postData = await getPostById(postId);
+      if (postData) {
+        // 데이터 매핑
+        setFormData({
+          title: postData.post_title,
+          content: postData.post_content,
+          date: postData.meeting_date.replace(' ', 'T').split('+')[0],
+          numberOfPeople: postData.post_rec_cnt,
+          location: postData.post_location,
+          menu: postData.post_menu,
+          file: postData.post_img_url, // 파일은 새로 업로드해야 함
+        });
+
+        // 기존 이미지 미리보기 설정
+        if (postData.post_img_url) {
+          setImagePreview(postData.post_img_url);
+        }
+      }
+    };
+
+    fetchPostData();
+  }, [postId]);
 
   // 엔터 키 눌림 방지 함수
   const handleKeyDown = (e) => {
@@ -39,7 +83,7 @@ const PostEditor = () => {
     }
   };
 
-  // . 검색 함수
+  // 직접 주소 검색 함수
   const searchAddress = useCallback(
     (inputAddress) => {
       const searchQuery = inputAddress?.trim() || formData.location.trim();
@@ -76,7 +120,7 @@ const PostEditor = () => {
         }
       );
     },
-    [formData.location]
+    [formData.location, ERROR]
   );
 
   // 주소 검색창 핸들러
@@ -92,7 +136,7 @@ const PostEditor = () => {
         }));
 
         // 선택한 주소를 바로 전달하여 검색
-        searchAddress(address);
+        setTimeout(() => searchAddress(address), 0);
       },
     }).open();
   };
@@ -106,9 +150,15 @@ const PostEditor = () => {
     }));
   };
 
-  // 이미지 파일 변경\
+  // 이미지 파일 변경 핸들러 수정
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
+
+    if (!selectedFile) {
+      // 파일 선택 취소 시 기존 이미지 유지
+      setFormData((prev) => ({ ...prev, file: prev.file }));
+      return;
+    }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
       alertConsole({
@@ -117,13 +167,11 @@ const PostEditor = () => {
       });
       return;
     }
-    if (selectedFile) {
-      setFormData((prev) => ({ ...prev, file: selectedFile }));
-      if (selectedFile.type.startsWith('image/')) {
-        const fileURL = URL.createObjectURL(selectedFile);
-        setFormData((prev) => ({ ...prev, selectedFile }));
-        setImagePreview(fileURL);
-      }
+
+    setFormData((prev) => ({ ...prev, file: selectedFile }));
+    if (selectedFile.type.startsWith('image/')) {
+      const fileURL = URL.createObjectURL(selectedFile);
+      setImagePreview(fileURL);
     }
   };
 
@@ -142,15 +190,13 @@ const PostEditor = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  // 이미지 제거
+  // 이미지 제거 핸들러
   const handleRemoveImage = (e) => {
-    e.preventDefault(); // 추가: 기본 동작 방지
-    e.stopPropagation(); // 이벤트 버블링 방지
+    e.preventDefault();
+    e.stopPropagation();
     setFormData((prev) => ({ ...prev, file: null }));
     setImagePreview('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   // 이미지 URL 메모리 해제
@@ -206,33 +252,52 @@ const PostEditor = () => {
       }
 
       // 스토리지 이미지 업로드
-      let fileUrl = '';
-      if (file) {
+      let fileUrl = formData.file;
+      // 새 파일이 업로드된 경우
+      if (file instanceof File) {
         const fileExtension = file.name.split('.').pop();
         const filePath = `uploads/${Date.now()}.${fileExtension}`;
 
-        // Supabase Storage에 이미지 업로드
+        // 기존 이미지 삭제 (이 부분을 새 파일 업로드 전으로 이동)
+        if (typeof formData.file === 'string') {
+          const oldFilePath = formData.file.split('/public/').pop();
+          await supabase.storage
+            .from('post-images')
+            .remove([`public/${oldFilePath}`]);
+        }
+
+        // 새 이미지 업로드
         const { error } = await supabase.storage
           .from('post-images')
           .upload(`public/${filePath}`, file);
 
-        if (error) {
-          console.error('이미지 업로드 실패:', error);
-          return;
+        if (error) throw error;
+        fileUrl = getImageUrl(filePath);
+      }
+      // 파일 삭제된 경우 (이 조건문을 별도로 분리)
+      else if (file === null) {
+        // 기존 이미지 삭제
+        if (typeof formData.file === 'string') {
+          const oldFilePath = formData.file.split('/public/').pop();
+          await supabase.storage
+            .from('post-images')
+            .remove([`public/${oldFilePath}`]);
         }
-
-        fileUrl = getImageUrl(filePath); // 업로드된 파일 URL 저장
+        fileUrl = null;
       }
 
       // 업로드 데이터
       const uploadData = {
+        // ID 조건부 추가 (업데이트 시 필수)
+        ...(postId && { id: postId }), // postId가 있으면 ID 필드 추가
+        id: postId || undefined,
         post_title: title,
         post_content: content,
         post_location: location,
         post_rec_cnt: numberOfPeople,
         post_img_url: fileUrl,
-        created_at: getKoreanTime(),
-        updated_at: null,
+        created_at: postId ? formData.created_at : getKoreanTime(), // 수정 시 기존 생성시간 유지
+        updated_at: postId ? getKoreanTime() : null, // 수정 시 현재 시간으로 업데이트
         author_name: MY_NICK_NAME,
         meeting_date: date,
         post_menu: menu,
@@ -280,6 +345,12 @@ const PostEditor = () => {
     }
   }
 
+  useEffect(() => {
+    if (formData.location) {
+      searchAddress(formData.location);
+    }
+  }, [formData.location, searchAddress]);
+
   return (
     <StRoot>
       <StTitleContainer>
@@ -295,6 +366,7 @@ const PostEditor = () => {
                 name='title'
                 placeholder='게시글 제목을 입력하세요'
                 className='title-input'
+                autoFocus
                 value={formData.title}
                 onChange={handleInputChange}
                 maxLength={50}
@@ -327,27 +399,27 @@ const PostEditor = () => {
                 onInput={(event) => preventLeadingZero(event.target)}
               />
             </StLabel>
+            <StLabel className='half-width'>
+              메뉴
+              <StInput
+                type='text'
+                name='menu'
+                placeholder='메뉴를 입력하세요'
+                className='menu-input'
+                value={formData.menu}
+                onChange={handleInputChange}
+                required
+              />
+            </StLabel>
           </StInputRow>
           <StInputRow>
-            <StLabel className='content-width'>
+            <StLabel className='full-width'>
               내용
               <StTextArea
                 name='content'
                 placeholder='게시글 내용을 상세히 입력하세요'
                 rows={8}
                 value={formData.content}
-                onChange={handleInputChange}
-                required
-              />
-            </StLabel>
-            <StLabel className='menu-width'>
-              메뉴
-              <StTextArea
-                name='menu'
-                placeholder='메뉴를 입력하세요'
-                className='menu-input'
-                rows={8}
-                value={formData.menu}
                 onChange={handleInputChange}
                 required
               />
@@ -538,14 +610,8 @@ const StLabel = styled.label`
     }
   }
 
-  &.content-width {
-    flex: 4;
-    min-width: 448px;
-  }
-
-  &.menu-width {
-    flex: 1;
-    min-width: 112px;
+  &.full-width {
+    width: 100%;
   }
 `;
 
@@ -610,9 +676,11 @@ const StTextArea = styled.textarea`
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   resize: vertical;
+  width: 100%;
   min-height: 150px;
   font-size: 1rem;
   line-height: 1.5;
+  box-sizing: border-box; /* 추가 */
 
   @media (max-width: 480px) {
     min-height: 120px;
