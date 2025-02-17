@@ -38,6 +38,17 @@ export const EditProfile = () => {
     //업로드할 유저정보 객체 복사
     const upLoadData = { ...userData };
 
+    const fetch = `public/upload/${new Date().getTime()}.webp`;
+    //수정할 이미지가 있으면 바뀐 링크를 반영하기 위해 위에 작성
+    if (imagePreview) {
+      //스토지리에서 뽑아서 사용할 링크
+
+      //이미지가 저장될 버킷 저장소의 주소를 profile 에 넣어줌
+      upLoadData.profile =
+        'https://akqkaonphmdqozkinveg.supabase.co/storage/v1/object/public/profile-images/' +
+        fetch;
+    }
+
     //서버에 데이터업데이트후 업데이트된 데이터 가져오기
     const { data, error } = await supabase
       .from('users')
@@ -63,8 +74,6 @@ export const EditProfile = () => {
       return;
     }
 
-    //스토지리에서 뽑아서 사용할 링크
-    const fetch = `public/upload/${new Date().getTime()}.webp`;
     if (imagePreview) {
       //스토리지에 업로드밑 링크 받아오기
       const uploadImage = await supabase.storage
@@ -79,11 +88,6 @@ export const EditProfile = () => {
         });
         return;
       }
-
-      //이미지가 저장된 버킷 저장소의 주소를 profile 에 넣어줌
-      upLoadData.profile =
-        'https://akqkaonphmdqozkinveg.supabase.co/storage/v1/object/public/profile-images/' +
-        fetch;
 
       //원래갖고있던 사용자의 이미지 주소를 바탕으로 버킷에서 삭제
       const removeImage = await supabase.storage
