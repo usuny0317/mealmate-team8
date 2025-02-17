@@ -1,11 +1,12 @@
 import { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { supabase } from '../supabase/client';
 import AuthContext from '../context/AuthContext';
 
 import { alert } from '../utils/alert';
 import { ALERT_TYPE } from '../constants/alertConstant';
+import { theme } from '../styles/theme';
 
 //로그인 페이지지
 const LogIn = () => {
@@ -13,12 +14,15 @@ const LogIn = () => {
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
 
+  //이메일 비밀번호 받아오기
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   //구조분해할당으로 context를 받아옵니다.
   const { setLoggedInUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
+
   //로그인 시도 및 사용자 정보를 context로 보냅니다.
   const loginhandler = async (e) => {
     e.preventDefault();
@@ -74,8 +78,12 @@ const LogIn = () => {
         sessionStorage.setItem('loggedInUser', JSON.stringify(data));
 
         //로그인상태가 바뀌면 컨텍스트 다시 렌더링
+
         setLoggedInUser(data);
-        navigate('/');
+        navigate('/', { replace: true });
+        window.history.pushState(null, '', '/');
+        window.history.replaceState(null, '', '/');
+
       }
     } catch (err) {
       errorAlert({ type: ERROR, content: '에러남!' + err });
@@ -114,16 +122,21 @@ const LogIn = () => {
               </label>
             </div>
             <button type='submit'>로그인하기</button>
-            <button>
-              <Link to='/signup' className='sign-up'>
-                회원가입하기
-              </Link>
+            <button
+              type='button'
+              onClick={() => {
+                navigate('/signup');
+              }}
+            >
+              회원가입하기
             </button>
           </form>
         </div>
 
         <div className='right-side'>
-          <div className='img-box'>로고 이미지</div>
+          <div className='img-box'>
+            <img src='/mm_white_logo.webp' />
+          </div>
         </div>
       </div>
     </StWrapper>
@@ -133,55 +146,75 @@ const LogIn = () => {
 export default LogIn;
 
 //이 아래는 스타일 컴포넌트 입니다.
-//아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
-//wrapper로 감쌌습니다!
 const StWrapper = styled.div`
   .all-page {
     display: flex;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+    color: ${({ theme }) => theme.colors.primaryLight};
   }
   .right-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid #ffaad4;
+    background-color: ${({ theme }) => theme.colors.primaryLight};
   }
   .left-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid #00aaff;
   }
 
   .img-box {
-    font-size: 32px;
-    font-weight: bold;
+    width: 100%;
+    height: 100%;
+  }
+  .img-box img {
+    width: 98%;
+    height: 98%;
+    object-fit: cover;
+    margin: 10px;
   }
 
   .login-form {
     padding: 20px;
-    border: 2px solid black;
     display: flex;
     flex-direction: column;
     font-size: 18px;
     gap: 16px;
+    width: 60%;
   }
+  .login-form button {
+    background-color: ${({ theme }) => theme.colors.primaryLight};
+    color: white;
+    border-radius: 3px;
+    font-weight: bold;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .input-group label {
+    width: 100%; /* label 고정 너비 */
+    text-align: right; /* 오른쪽 정렬 */
+  }
+
   .input-group input {
+    flex: 1;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    font-size: 20px;
-  }
-
-  .sign-up {
-    text-decoration-line: none;
+    width: calc(100% - 110px); /* input이 남은 공간 채우기 */
+    box-sizing: border-box;
+    margin-left: 10px;
   }
 `;
