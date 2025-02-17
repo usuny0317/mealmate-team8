@@ -15,7 +15,7 @@ function PostCard({ postData }) {
   };
 
   return (
-    <PostCardWrapper>
+    <StPostCardWrapper>
       <p className='context'>
         <img
           className='profile'
@@ -47,13 +47,13 @@ function PostCard({ postData }) {
         </p>
         <p className='context'>n명/{postData.post_rec_cnt}</p>
       </div>
-    </PostCardWrapper>
+    </StPostCardWrapper>
   );
 }
 
 export default React.memo(PostCard);
 
-const PostCardWrapper = styled.section`
+const StPostCardWrapper = styled.section`
   flex: 1 1 300px;
   max-width: 300px;
   box-sizing: border-box;
