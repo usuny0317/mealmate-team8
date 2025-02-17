@@ -37,6 +37,7 @@ const Signup = () => {
     //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
     if (main_location) {
       setget_sub(get_sub_select(main_location));
+      setSub_location(get_sub_select(main_location)[0]);
     }
   }, [main_location]);
 
@@ -160,6 +161,7 @@ const Signup = () => {
                 type='radio'
                 value={true}
                 name='gender'
+                defaultChecked
                 onChange={() => {
                   setGender(true);
                 }}
@@ -223,7 +225,14 @@ const Signup = () => {
             프로필: <button type='button'>추가</button>{' '}
             <button type='button'>삭제</button>
           </label>
-          <button type='submit'>가입하기</button>
+          <button
+            type='submit'
+            onClick={() => {
+              console.log('' + main_location + ' ' + sub_location);
+            }}
+          >
+            가입하기
+          </button>
         </form>
       </div>
     </div>
