@@ -19,6 +19,7 @@ const Signup = () => {
   const [profile, setProfile] = useState(
     'https://www.icreta.com/files/attach/images/319/275/055/8e2c1590a474a9afb78c4cb23a9af5b2.jpg'
   );
+  const [check, setCheck] = useState(false);
   //셀렉트 박스 전용
   const mainselect = main_select;
   //select박스에서 두번째 인자 전용입니다!
@@ -31,7 +32,7 @@ const Signup = () => {
   const { SUCCESS, ERROR } = ALERT_TYPE;
   const SignupAlert = alert();
 
-  //1. select Box useEffect
+  //select Box useEffect
   useEffect(() => {
     //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
     if (main_location) {
@@ -39,39 +40,68 @@ const Signup = () => {
     }
   }, [main_location]);
 
+  //닉네임 중복 핸들러
+  const handleNickname = async (e) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase
+        .from('users') // 테이블 이름
+        .select('nick_name');
+      if (error) throw error;
+
+      const nickNames = data.map((item) => item.nick_name);
+
+      if (!nickNames.includes(nickname) && nickname !== '') {
+        setCheck(true);
+        SignupAlert({ type: SUCCESS, content: '사용가능합니다!' });
+      } else if (nickname === '') {
+        throw '닉네임이 빈 값입니다.';
+      } else {
+        throw '중복 닉네임입니다!';
+      }
+    } catch (error) {
+      SignupAlert({ type: ERROR, content: '실패했습니다!' + error });
+    }
+  };
+
+  //로그인 핸들러
   const handleSignup = async (e) => {
     e.preventDefault();
-
     //수파 베이스 연결 시도하기기
     try {
-      // 이메일 비밀번호로 회원가입!!
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      if (!check) throw '닉네임 중복 검사를 해주세요';
+      else {
+        // 이메일 비밀번호로 회원가입!!
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (authErr) throw authErr;
-      //정보가 없는 경우도 추가했습니다.
-      if (!authData || !authData.user) {
-        throw new Error('회원가입 실패: 유저 정보가 없습니다.');
+        if (authErr) throw authErr;
+
+        //정보가 없는 경우도 추가했습니다.
+        if (!authData || !authData.user) {
+          throw new Error('회원가입 실패: 유저 정보가 없습니다.');
+        }
+
+        const { error: userErr } = await supabase.from('users').insert({
+          id: authData.user.id,
+          nick_name: nickname,
+          gender,
+          main_location,
+          sub_location,
+          profile,
+        });
+
+        if (userErr) throw userErr;
+
+        SignupAlert({
+          type: SUCCESS,
+          content: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
+        });
+
+        navigate('/login');
       }
-
-      const { error: userErr } = await supabase.from('users').insert({
-        id: authData.user.id,
-        nick_name: nickname,
-        gender,
-        main_location,
-        sub_location,
-        profile,
-      });
-      if (userErr) throw userErr;
-
-      SignupAlert({
-        type: SUCCESS,
-        content: '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
-      });
-
-      navigate('/login');
     } catch (error) {
       SignupAlert({
         type: ERROR,
@@ -118,6 +148,9 @@ const Signup = () => {
                 setNickname(e.target.value);
               }}
             />
+            <button type='button' onClick={handleNickname}>
+              중복 검사
+            </button>
           </label>
           <label>
             성별:
@@ -129,7 +162,6 @@ const Signup = () => {
                 name='gender'
                 onChange={() => {
                   setGender(true);
-                  console.log(typeof gender);
                 }}
               />
             </label>
@@ -141,7 +173,6 @@ const Signup = () => {
                 name='gender'
                 onChange={() => {
                   setGender(false);
-                  console.log(typeof gender);
                 }}
               />
             </label>
@@ -158,8 +189,6 @@ const Signup = () => {
               onChange={(e) => {
                 const selectedValue = e.target.value;
                 setMain_location(selectedValue);
-
-                console.log(main_location);
               }}
             >
               {mainselect.map((main) => {
@@ -191,7 +220,8 @@ const Signup = () => {
             </select>
           </label>
           <label>
-            프로필: <button>추가</button> <button>삭제</button>
+            프로필: <button type='button'>추가</button>{' '}
+            <button type='button'>삭제</button>
           </label>
           <button type='submit'>가입하기</button>
         </form>
