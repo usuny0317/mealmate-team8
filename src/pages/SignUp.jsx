@@ -90,8 +90,7 @@ const Signup = () => {
             이메일:{' '}
             <input
               placeholder='이메일'
-              /* 아래는 이메일 정규식이라하네요! 형식과 다르면 입력이 안됩니다! 마지막은 com 이나 net이여야합니다!*/
-              pattern='^[^\s@]+@[^\s@]+\.[^\s@]+$'
+              type='email'
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
@@ -130,6 +129,7 @@ const Signup = () => {
                 name='gender'
                 onChange={() => {
                   setGender(true);
+                  console.log(typeof gender);
                 }}
               />
             </label>
@@ -141,6 +141,7 @@ const Signup = () => {
                 name='gender'
                 onChange={() => {
                   setGender(false);
+                  console.log(typeof gender);
                 }}
               />
             </label>
