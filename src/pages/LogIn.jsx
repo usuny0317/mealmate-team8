@@ -83,7 +83,6 @@ const LogIn = () => {
         navigate('/', { replace: true });
         window.history.pushState(null, '', '/');
         window.history.replaceState(null, '', '/');
-
       }
     } catch (err) {
       errorAlert({ type: ERROR, content: '에러남!' + err });
@@ -95,6 +94,11 @@ const LogIn = () => {
       <div className='all-page'>
         <div className='left-side'>
           <form className='login-form' id='send-user' onSubmit={loginhandler}>
+            <div className='title'>
+              <img src='/mm_logo.svg' />
+              <div className='text'>로그인</div>
+            </div>
+
             <div className='input-group'>
               <label>
                 Email:
@@ -132,12 +136,6 @@ const LogIn = () => {
             </button>
           </form>
         </div>
-
-        <div className='right-side'>
-          <div className='img-box'>
-            <img src='/mm_white_logo.webp' />
-          </div>
-        </div>
       </div>
     </StWrapper>
   );
@@ -150,33 +148,30 @@ const StWrapper = styled.div`
   .all-page {
     display: flex;
     width: 100vw;
-    height: 100vh;
     overflow: hidden;
-    color: ${({ theme }) => theme.colors.primaryLight};
-  }
-  .right-side {
-    width: 50%;
-    display: flex;
     justify-content: center;
     align-items: center;
-    background-color: ${({ theme }) => theme.colors.primaryLight};
+    color: ${({ theme }) => theme.colors.primaryLight};
   }
+
   .left-side {
     width: 50%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
   }
 
-  .img-box {
-    width: 100%;
-    height: 100%;
+  img {
+    width: 100px;
+    height: 100px;
+    margin-top: 50px;
   }
-  .img-box img {
-    width: 98%;
-    height: 98%;
-    object-fit: cover;
-    margin: 10px;
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .login-form {
@@ -187,11 +182,14 @@ const StWrapper = styled.div`
     gap: 16px;
     width: 60%;
   }
+
   .login-form button {
     background-color: ${({ theme }) => theme.colors.primaryLight};
     color: white;
     border-radius: 3px;
     font-weight: bold;
+    border: none;
+    padding: 10px 0;
   }
 
   .input-group {
@@ -203,8 +201,8 @@ const StWrapper = styled.div`
   }
 
   .input-group label {
-    width: 100%; /* label 고정 너비 */
-    text-align: right; /* 오른쪽 정렬 */
+    width: 100%;
+    text-align: right;
   }
 
   .input-group input {
@@ -216,5 +214,8 @@ const StWrapper = styled.div`
     width: calc(100% - 110px); /* input이 남은 공간 채우기 */
     box-sizing: border-box;
     margin-left: 10px;
+  }
+  .text {
+    margin-top: 10px;
   }
 `;
