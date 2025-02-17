@@ -24,7 +24,8 @@ const Router = () => {
             <Route path='my-posts' element={<MyPosts />} />
             <Route path='joined-posts' element={<JoinedPosts />} />
           </Route>
-          <Route path="/detail/:id" element={<Detail />} />
+          <Route path='/detail/:id' element={<Detail />} />
+          <Route path='/posteditior/:postId' element={<PostEditor />} />
           <Route path='/posteditior' element={<PostEditor />} />
           <Route path='/user-posts/:userNickname' element={<UserPosts />} />
         </Routes>
