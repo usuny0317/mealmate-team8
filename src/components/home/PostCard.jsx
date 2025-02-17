@@ -8,7 +8,7 @@ const EndPost = () => {
   return (
     <div id='endPostWrapper'>
       <div id='endPost'>
-        <img width='250px' src='/src/assets/deadline.png' alt='end' />
+        <img width='250px' src='/deadline.png' alt='end' />
       </div>
     </div>
   );
