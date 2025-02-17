@@ -12,6 +12,7 @@ const PostEditor = () => {
   const MAX_FILE_SIZE = 50 * 1024 * 1024;
   const { SUCCESS, ERROR, WARNING } = ALERT_TYPE;
   const navigate = useNavigate();
+  const hasInitialSearch = useRef(false);
   const alertConsole = alert();
   const MY_NICK_NAME = JSON.parse(
     sessionStorage.getItem('loggedInUser')
@@ -30,7 +31,7 @@ const PostEditor = () => {
   const [imagePreview, setImagePreview] = useState(''); // 이미지 미리보기 상태
   const fileInputRef = useRef(null); // 파일 입력 필드 접근을 위한 ref
   const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 }); // 지도의 위치값 상태
-  const postId = useParams(); // 가져올 게시글 ID
+  const { postId } = useParams(); // 가져올 게시글 ID
 
   // 게시글의 id와 일치한 데이터 가져오기
   const getPostById = async (postId) => {
@@ -290,7 +291,6 @@ const PostEditor = () => {
       const uploadData = {
         // ID 조건부 추가 (업데이트 시 필수)
         ...(postId && { id: postId }), // postId가 있으면 ID 필드 추가
-        id: postId || undefined,
         post_title: title,
         post_content: content,
         post_location: location,
@@ -346,10 +346,11 @@ const PostEditor = () => {
   }
 
   useEffect(() => {
-    if (formData.location) {
+    if (postId && formData.location && !hasInitialSearch.current) {
       searchAddress(formData.location);
+      hasInitialSearch.current = true; // 실행 후 플래그 설정
     }
-  }, [formData.location, searchAddress]);
+  }, [postId, formData.location]);
 
   return (
     <StRoot>
