@@ -11,7 +11,7 @@ function PostCard({ postData }) {
   };
 
   const moveToDetail = (targetId) => {
-    navigate(`/detail?id=${targetId}`);
+    navigate(`/detail/${targetId}`);
   };
 
   return (
