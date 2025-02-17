@@ -2,13 +2,11 @@ import { useContext, useState } from 'react';
 import { alert } from '../../utils/alert';
 import { ALERT_TYPE } from '../../constants/alertConstant';
 import AuthContext from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { main_select, sub_select } from '../../constants/signUpSelector';
 import styled from 'styled-components';
 import { supabase } from '../../supabase/client';
 export const EditProfile = () => {
   const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
-  const navigate = useNavigate();
 
   //스위트알럿설정값
   const { ERROR, SUCCESS } = ALERT_TYPE;
@@ -26,8 +24,9 @@ export const EditProfile = () => {
   const editProfileHandler = async () => {
     //입력된 정보가 없을때 뜨는 알럿
     if (
+      !imagePreview &&
       JSON.stringify({ ...loggedInUser, ...userData }) ===
-      JSON.stringify(loggedInUser)
+        JSON.stringify(loggedInUser)
     ) {
       errorAlert({
         type: ERROR,
@@ -36,10 +35,51 @@ export const EditProfile = () => {
       return;
     }
 
+    //업로드할 유저정보 객체 복사
+    const upLoadData = { ...userData };
+
+    //스토지리에서 뽑아서 사용할 링크
+    const fetch = `public/upload/${new Date().getTime()}.webp`;
+    if (imagePreview) {
+      //스토리지에 업로드밑 링크 받아오기
+      const uploadImage = await supabase.storage
+        .from('profile-images')
+        .upload(fetch, selectedFile);
+
+      //이미지업로드실패시
+      if (uploadImage?.error) {
+        errorAlert({
+          type: ERROR,
+          content: '이미지 업로드 실패',
+        });
+        return;
+      }
+
+      //이미지가 저장된 버킷 저장소의 주소를 profile 에 넣어줌
+      upLoadData.profile =
+        'https://akqkaonphmdqozkinveg.supabase.co/storage/v1/object/public/profile-images/' +
+        fetch;
+
+      //원래갖고있던 사용자의 이미지 주소를 바탕으로 버킷에서 삭제
+      const removeImage = await supabase.storage
+        .from('profile-images')
+        .remove([loggedInUser.profile.split('/public/profile-images/')[1]]);
+
+      //이미지삭제요청실패시
+      if (removeImage?.error) {
+        errorAlert({
+          type: ERROR,
+          content: '삭제실패',
+        });
+        return;
+      }
+    }
+    //
+
     //서버에 데이터업데이트후 업데이트된 데이터 가져오기
     const { data, error } = await supabase
       .from('users')
-      .update(userData)
+      .update(upLoadData)
       .eq('id', loggedInUser.id)
       .select('*');
 
@@ -72,16 +112,50 @@ export const EditProfile = () => {
     });
   };
 
+  //파일 미리보기를 위한 state
+  const [imagePreview, setImagePreview] = useState('');
+
+  //파일을 저장할 state
+  const [selectedFile, setSelectedFile] = useState('');
+
+  //미리보기로 보여주고 selectedFile에 선택된 파일이 들어감
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+    const fileURL = URL.createObjectURL(e.target.files[0]);
+    setImagePreview(fileURL);
+  };
+
   return (
     <StEditProfileWrapper>
       <div className='logged-user-info'>
+        {/* 이미지를 보여줄 부분,파일이 선택이 안되어 있으면 원래이미지를 보여줌 */}
+        {imagePreview ? (
+          <div>
+            <img src={imagePreview} width='300px' />
+          </div>
+        ) : (
+          <div>
+            <img src={userData.profile} width='300px' />
+          </div>
+        )}
+
+        {/* 파일선택부분 */}
         <div>
-          <img src={userData.profile} width='300px' />
+          변경할 이미지 파일 선택
+          <br />
+          <input type='file' accept='image/*' onChange={handleFileChange} />
+          <button
+            onClick={() => {
+              setImagePreview('');
+            }}
+          >
+            이미지 선택취소
+          </button>
         </div>
+
+        {/* 닉네임변경 */}
         <div>
-          <label htmlFor='nickname'>
-            변경할 닉네임 <br />
-          </label>
+          변경할 닉네임 <br />
           <input
             type='text'
             value={userData.nick_name}
@@ -91,6 +165,7 @@ export const EditProfile = () => {
           />
         </div>
 
+        {/* 지역선택셀렉트박스 */}
         <div>
           지역
           <br />
@@ -129,7 +204,9 @@ export const EditProfile = () => {
         <div>성별: {userData.gender ? '남자' : '여자'}</div>
 
         <div>
-          <button onClick={editProfileHandler}>수정하기</button>
+          <button onClick={editProfileHandler} className='edit'>
+            수정하기
+          </button>
         </div>
       </div>
     </StEditProfileWrapper>
@@ -154,7 +231,7 @@ const StEditProfileWrapper = styled.div`
     aspect-ratio: 1 / 1;
     width: 200px;
   }
-  input {
+  input-text {
     width: 150px;
     padding: 10px 15px;
     border: 1px solid #ccc;
@@ -163,7 +240,14 @@ const StEditProfileWrapper = styled.div`
     outline: none;
     transition: border-color 0.3s ease-in-out;
   }
-
+  .input-file {
+    /* 기본 파일 입력의 스타일을 조정 */
+    width: 0; /* 크기 숨기기 */
+    height: 0; /* 크기 숨기기 */
+    padding: 0; /* 패딩 숨기기 */
+    border: none; /* 테두리 숨기기 */
+    visibility: hidden; /* 텍스트와 버튼 숨기기 */
+  }
   input:focus {
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
@@ -183,7 +267,7 @@ const StEditProfileWrapper = styled.div`
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
   }
-  button {
+  .edit {
     padding: 12px 20px;
     font-size: 16px;
     border: none;
@@ -194,7 +278,7 @@ const StEditProfileWrapper = styled.div`
     transition: background 0.3s ease-in-out;
   }
 
-  button:hover {
+  .edit:hover {
     background-color: #0056b3;
   }
 `;
