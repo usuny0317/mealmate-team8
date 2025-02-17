@@ -187,14 +187,15 @@ useEffect(() => {
   );
 };
 
-// 페이지 전체 컨테이너 스타일링
+// 페이지 전역 컨테이너 스타일링
 const StPageContainer = styled.div`
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   background: #f7f7f7;
   display: flex;
   justify-content: center;
   padding: 10px;
+  box-sizing: border-box;
 `;
 
 // 게시글 콘텐츠 컨테이너 스타일링
@@ -269,14 +270,16 @@ const StAuthorInfo = styled.p`
 // 이미지 컨테이너 스타일링
 const StImageContainer = styled.div`
   width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
   overflow: hidden;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  position: relative;
+
   img {
     width: 100%;
     height: 100%;
-    max-height: 650px;
-    border-radius: 6px;
+    object-fit: cover;
+    border-radius: 8px;
   }
 `;
 
