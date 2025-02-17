@@ -16,7 +16,7 @@ const LogIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   //구조분해할당으로 context를 받아옵니다.
-  const { setIsLogin } = useContext(AuthContext);
+  const { setLoggedInUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
   //로그인 시도 및 사용자 정보를 context로 보냅니다.
@@ -71,11 +71,10 @@ const LogIn = () => {
         }
 
         //성공할 시
-        sessionStorage.setItem('isLogin', '로그인완료됨');
         sessionStorage.setItem('loggedInUser', JSON.stringify(data));
 
         //로그인상태가 바뀌면 컨텍스트 다시 렌더링
-        setIsLogin(true);
+        setLoggedInUser(data);
         navigate('/');
       }
     } catch (err) {
