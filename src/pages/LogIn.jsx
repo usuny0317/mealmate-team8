@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { supabase } from '../supabase/client';
 import AuthContext from '../context/AuthContext';
@@ -79,7 +79,12 @@ const LogIn = () => {
 
         //로그인상태가 바뀌면 컨텍스트 다시 렌더링
         setIsLogin(true);
-        navigate('/');
+        navigate('/', { replace: true });
+        //로그인 이전에 갔던 페이지 기록 지움
+        window.history.pushState(null, '', '/');
+        window.history.replaceState(null, '', '/');
+        //만약 뒤로 가기가 된다면 브라우저 캐시 때문일 가능성이 있습니다.
+        //저도 캐시 지우니 뒤로가기가 비활성화 되었습니다.
       }
     } catch (err) {
       errorAlert({ type: ERROR, content: '에러남!' + err });
@@ -118,10 +123,13 @@ const LogIn = () => {
               </label>
             </div>
             <button type='submit'>로그인하기</button>
-            <button type='button'>
-              <Link to='/signup' className='sign-up'>
-                회원가입하기
-              </Link>
+            <button
+              type='button'
+              onClick={() => {
+                navigate('/signup');
+              }}
+            >
+              회원가입하기
             </button>
           </form>
         </div>
@@ -139,22 +147,20 @@ const LogIn = () => {
 export default LogIn;
 
 //이 아래는 스타일 컴포넌트 입니다.
-//아직 전체적인 색과 버튼 그리고 로고를 넣지 않아 형태만 있습니다!
-//wrapper로 감쌌습니다!
 const StWrapper = styled.div`
   .all-page {
     display: flex;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primaryLight};
   }
   .right-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: ${({ theme }) => theme.colors.primary};
+    background-color: ${({ theme }) => theme.colors.primaryLight};
   }
   .left-side {
     width: 50%;
@@ -168,9 +174,10 @@ const StWrapper = styled.div`
     height: 100%;
   }
   .img-box img {
-    width: 100%;
-    height: 100%;
+    width: 98%;
+    height: 98%;
     object-fit: cover;
+    margin: 10px;
   }
 
   .login-form {
@@ -182,7 +189,7 @@ const StWrapper = styled.div`
     width: 60%;
   }
   .login-form button {
-    background-color: ${({ theme }) => theme.colors.primary};
+    background-color: ${({ theme }) => theme.colors.primaryLight};
     color: white;
     border-radius: 3px;
     font-weight: bold;
@@ -210,11 +217,5 @@ const StWrapper = styled.div`
     width: calc(100% - 110px); /* input이 남은 공간 채우기 */
     box-sizing: border-box;
     margin-left: 10px;
-  }
-
-  .sign-up {
-    text-decoration-line: none;
-    color: white;
-    font-weight: bold;
   }
 `;
