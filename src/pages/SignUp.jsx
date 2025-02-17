@@ -70,7 +70,7 @@ const Signup = () => {
     }
   };
 
-  //회원가입입 핸들러
+  //회원가입 핸들러
   const handleSignup = async (e) => {
     e.preventDefault();
     //수파 베이스 연결 시도하기기
@@ -90,13 +90,32 @@ const Signup = () => {
           throw new Error('회원가입 실패: 유저 정보가 없습니다.');
         }
 
+        //스토리지에 이미지 업로드
+        let fileUrl = profile;
+        console.log('', profile);
+        if (profile) {
+          console.log('프로필 값은 있네용');
+          const fileExtension = profile.name.split('.').pop();
+          console.log('fileEx', fileExtension);
+          const filePath = `upload/${Date.now()}.${fileExtension}`;
+          console.log('filePath', filePath);
+
+          //새 이미지 업로드
+          const { error } = await supabase.storage
+            .from('profile-images')
+            .upload(`public/${filePath}`, profile);
+          if (error) throw error;
+          fileUrl = getImageUrl(filePath);
+        }
+        console.log(fileUrl);
+
         const { error: userErr } = await supabase.from('users').insert({
           id: authData.user.id,
           nick_name: nickname,
           gender,
           main_location,
           sub_location,
-          profile,
+          profile: fileUrl,
         });
 
         if (userErr) throw userErr;
@@ -140,6 +159,12 @@ const Signup = () => {
     e.stopPropagation();
     setProfile('');
     setImagePreview('');
+  };
+
+  const getImageUrl = (imageName) => {
+    return `${
+      import.meta.env.VITE_APP_SUPABASE_URL
+    }/storage/v1/object/public/profile-images/public/${imageName}`;
   };
 
   return (
