@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // 패스 파라미터(디테일 페이지 열기)
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/client.js';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
@@ -38,10 +38,10 @@ export const Detail = () => {
     }
   }, [isLogin, navigate, errorAlert]);
 
-  // 로그인되지 않았으면 안보여주기
+  // 로그인되지 않았으면 페이지 안보여주기
   if (!isLogin) {
     return null;
-  }
+  }; 
 
   // 현재 로그인된 사용자 ID를 가져오는 함수
   useEffect(() => {
@@ -94,27 +94,51 @@ export const Detail = () => {
 
   // 게시글 수정 버튼 클릭 이벤트
   const handleEdit = () => {
-    // 쿼리 스트링을 사용하여 postId 전달
     navigate(`/posteditior?id=${postId}`);
+  };
+
+  // 게시글 삭제 버튼 클릭 이벤트
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm('정말로 이 게시글을 삭제하시겠습니까?');
+    if (!confirmDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      alert('게시글이 삭제되었습니다.');
+      navigate('/');
+    } catch (error) {
+      console.error('게시글 삭제 실패:', error.message);
+    }
   };
 
   // 디테일 페이지 렌더링
   return (
     <StPageContainer>
       <StArticleContainer>
-        {/* 게시글 제목 및 수정 버튼 */}
+        {/* 게시글 제목 및 수정/삭제 버튼 */}
         <StTitleContainer>
           <StTitle>{post.post_title}</StTitle>
+          {/* 조건부 렌더링 (userid가 posts테이블의 userid와 같을때만 버튼 보이기!) */}
+          {userId === post.user_id && (
+            <StButtonContainer>
+              <StEditButton onClick={handleEdit}>수정</StEditButton>
+              <StDeleteButton onClick={handleDelete}>삭제</StDeleteButton>
+            </StButtonContainer>
+          )}
         </StTitleContainer>
 
         {/* 작성자 정보 표시 */}
         <StAuthorInfo>
           작성자: {post.author_name} ·{' '}
           {dayjs(post.created_at).format('YYYY년 MM월 DD일 HH시 mm분')}
-          <EditButton onClick={handleEdit}>수정</EditButton>
         </StAuthorInfo>
 
-        {/* 게시글 이미지 표시 */}
         {/* 게시글 이미지 표시 */}
         {post.post_img_url ? (
           <StImageContainer>
@@ -131,11 +155,11 @@ export const Detail = () => {
 
         {/* 추가 정보 표시 */}
         <StExtraInfo>
-          <p>🍽️ 메뉴: {post.post_menu}</p>
-          <p>📍 위치: {post.post_location}</p>
-          <p>📆 날짜: {dayjs(post.meeting_date).format('YYYY년 MM월 DD일')}</p>
-          <p>🕒 시간: {dayjs(post.meeting_date).format('HH시 mm분')}</p>
-          <p>👥 모집 인원수: {post.post_rec_cnt}</p>
+          <p>메뉴: {post.post_menu}</p>
+          <p>위치: {post.post_location}</p>
+          <p>날짜: {dayjs(post.meeting_date).format('YYYY년 MM월 DD일')}</p>
+          <p>시간: {dayjs(post.meeting_date).format('HH시 mm분')}</p>
+          <p>모집 인원수: {post.post_rec_cnt}</p>
         </StExtraInfo>
 
         {/* 좋아요(함께해요) 버튼 */}
@@ -160,6 +184,7 @@ const StPageContainer = styled.div`
 
 // 게시글 콘텐츠 컨테이너 스타일링
 const StArticleContainer = styled.div`
+  position: relative;
   width: 100%;
   max-width: 1200px;
   background: #fff;
@@ -168,7 +193,7 @@ const StArticleContainer = styled.div`
   line-height: 1.8;
 `;
 
-// 제목 및 수정 버튼 컨테이너
+// 제목 및 버튼 컨테이너 스타일링
 const StTitleContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -183,8 +208,14 @@ const StTitle = styled.h1`
   color: #333;
 `;
 
+// 버튼 컨테이너 스타일링
+const StButtonContainer = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
 // 수정 버튼 스타일링
-const EditButton = styled.button`
+const StEditButton = styled.button`
   padding: 6px 12px;
   font-size: 14px;
   background-color: #4a90e2;
@@ -195,6 +226,21 @@ const EditButton = styled.button`
 
   &:hover {
     background-color: #357ab7;
+  }
+`;
+
+// 삭제 버튼 스타일링
+const StDeleteButton = styled.button`
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #e24a4a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #c93b3b;
   }
 `;
 
