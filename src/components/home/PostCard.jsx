@@ -74,7 +74,7 @@ function PostCard({ postData }) {
         <p className='context'>
           {dayjs(postData.meeting_date).format('YYYY-MM-DD HH:ss')}
         </p>
-        <p className='context'>
+        <p className='context recruited'>
           {postData.post_rec_cnt}명 중&nbsp;
           {postData.actions.length}
           명이 모였어요!&nbsp;
@@ -158,5 +158,8 @@ const StPostCardWrapper = styled.section`
     margin-right: 15px;
     border-radius: 50%;
     cursor: default;
+  }
+  .recruited {
+    white-space: nowrap;
   }
 `;
