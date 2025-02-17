@@ -1,4 +1,4 @@
-const sub_select = {
+export const sub_select = {
   서울특별시: [
     '종로구',
     '중구',
