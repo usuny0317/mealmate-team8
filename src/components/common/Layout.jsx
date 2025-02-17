@@ -6,7 +6,7 @@ import { ALERT_TYPE } from '../../constants/alertConstant';
 import { alert } from '../../utils/alert';
 
 export const Layout = ({ children }) => {
-  const { isLogin, setIsLogin } = useContext(AuthContext);
+  const { isLogin, setLoggedInUser, loggedInUser } = useContext(AuthContext);
 
   //전역 theme 가져오기
   const {
@@ -21,7 +21,7 @@ export const Layout = ({ children }) => {
   const logOutHandler = () => {
     errorAlert({ type: SUCCESS, content: '로그아웃 되었습니다.' });
     sessionStorage.clear();
-    setIsLogin(false);
+    setLoggedInUser(null);
   };
 
   return (
@@ -47,7 +47,7 @@ export const Layout = ({ children }) => {
                 <Link to='/mypage/my-posts'>
                   <img
                     className='profile'
-                    src='https://contents.creators.mypetlife.co.kr/content/uploads/2020/03/20175706/202003202Faf7a5a92a45c71f76391883a3e3ac572.jpg'
+                    src={loggedInUser.profile}
                     alt='user_profile'
                   />
                 </Link>
@@ -98,6 +98,8 @@ const StLayout = styled.div`
     font-size: 17px;
   }
   .profile {
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
     width: 60px;
     border-radius: 50%;
     cursor: pointer;

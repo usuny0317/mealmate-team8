@@ -19,7 +19,8 @@ const LogIn = () => {
   const [password, setPassword] = useState('');
 
   //구조분해할당으로 context를 받아옵니다.
-  const { setIsLogin } = useContext(AuthContext);
+  const { setLoggedInUser } = useContext(AuthContext);
+
   const navigate = useNavigate();
 
   //로그인 시도 및 사용자 정보를 context로 보냅니다.
@@ -74,17 +75,15 @@ const LogIn = () => {
         }
 
         //성공할 시
-        sessionStorage.setItem('isLogin', '로그인완료됨');
         sessionStorage.setItem('loggedInUser', JSON.stringify(data));
 
         //로그인상태가 바뀌면 컨텍스트 다시 렌더링
-        setIsLogin(true);
+
+        setLoggedInUser(data);
         navigate('/', { replace: true });
-        //로그인 이전에 갔던 페이지 기록 지움
         window.history.pushState(null, '', '/');
         window.history.replaceState(null, '', '/');
-        //만약 뒤로 가기가 된다면 브라우저 캐시 때문일 가능성이 있습니다.
-        //저도 캐시 지우니 뒤로가기가 비활성화 되었습니다.
+
       }
     } catch (err) {
       errorAlert({ type: ERROR, content: '에러남!' + err });
