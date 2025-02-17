@@ -35,7 +35,7 @@ export const alert = () => {
 
     return Swal.fire({
       title: alert.title,
-      text: alert.content,
+      html: alert.content,
       icon: alert.type,
       confirmButtonText: alert.buttonText,
       confirmButtonColor: alert.buttonColor,

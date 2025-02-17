@@ -21,11 +21,27 @@ const PostEditor = () => {
     numberOfPeople: 1,
     location: '',
     file: null,
+    menu: '',
   });
 
   const [imagePreview, setImagePreview] = useState(''); // 이미지 미리보기 상태
   const fileInputRef = useRef(null); // 파일 입력 필드 접근을 위한 ref
   const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 }); // 지도의 위치값 상태
+  // const KAKAO_MAP_API_KEY = import.meta.env.VITE_APP_KAKAO_KEY;
+
+  // 카카오 맵 스크립트 추가
+  // useEffect(() => {
+  //   const mapScript = document.createElement('script');
+  //   mapScript.type = 'text/javascript';
+  //   mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_API_KEY}&libraries=services,clusterer`;
+  //   mapScript.async = true;
+
+  //   document.head.appendChild(mapScript);
+
+  //   return () => {
+  //     document.head.removeChild(mapScript);
+  //   };
+  // }, []);
 
   // 다음 주소 검색 api
   useEffect(() => {
@@ -66,8 +82,16 @@ const PostEditor = () => {
     (inputAddress) => {
       const searchQuery = inputAddress?.trim() || formData.location.trim();
       const { kakao } = window;
-      if (!kakao?.maps?.services)
-        return console.error('Kakao Map API 로드 실패');
+
+      if (!searchQuery) {
+        alert('주소를 입력해주세요!');
+        return;
+      }
+
+      if (!kakao?.maps?.services) {
+        console.error('Kakao Map API 로드 실패');
+        return;
+      }
 
       new kakao.maps.services.Geocoder().addressSearch(
         searchQuery,
@@ -78,6 +102,14 @@ const PostEditor = () => {
               lng: +result[0].x,
               isPanTo: true,
             });
+          } else {
+            alertConsole({
+              type: ERROR,
+              content: `${searchQuery}에 대한 결과를 찾을 수 없습니다.<br/>정확한 주소를 입력하거나 검색을 이용해주세요.`,
+            });
+            setFormData(() => ({
+              location: '',
+            }));
           }
         }
       );
@@ -142,6 +174,7 @@ const PostEditor = () => {
       numberOfPeople: 1,
       location: '',
       file: null,
+      menu: '',
     });
     setImagePreview('');
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -188,7 +221,7 @@ const PostEditor = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // 승인 알림 표시
-        Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
+        Swal.fire('취소가 되었습니다.', '', 'success');
         navigate('/');
       }
     });
@@ -198,7 +231,8 @@ const PostEditor = () => {
     e.preventDefault();
 
     try {
-      const { title, content, date, numberOfPeople, location, file } = formData;
+      const { title, content, date, numberOfPeople, location, file, menu } =
+        formData;
 
       // 날짜 유효성 검증
       if (new Date(date).getTime() <= new Date().getTime()) {
@@ -239,6 +273,7 @@ const PostEditor = () => {
         updated_at: null,
         author_name: '장현빈',
         meeting_date: date,
+        post_menu: menu,
       };
 
       // 게시글 데이터 저장 (예: Supabase 데이터베이스에 저장)
@@ -331,18 +366,31 @@ const PostEditor = () => {
               />
             </StLabel>
           </StInputRow>
-
-          <StLabel>
-            내용
-            <StTextArea
-              name='content'
-              placeholder='게시글 내용을 상세히 입력하세요'
-              rows={8}
-              value={formData.content}
-              onChange={handleInputChange}
-              required
-            />
-          </StLabel>
+          <StInputRow>
+            <StLabel className='content-width'>
+              내용
+              <StTextArea
+                name='content'
+                placeholder='게시글 내용을 상세히 입력하세요'
+                rows={8}
+                value={formData.content}
+                onChange={handleInputChange}
+                required
+              />
+            </StLabel>
+            <StLabel className='menu-width'>
+              메뉴
+              <StTextArea
+                name='menu'
+                placeholder='메뉴를 입력하세요'
+                className='menu-input'
+                rows={8}
+                value={formData.menu}
+                onChange={handleInputChange}
+                required
+              />
+            </StLabel>
+          </StInputRow>
 
           <StInputRow>
             <StLabel className='half-width'>
@@ -526,6 +574,16 @@ const StLabel = styled.label`
     @media (max-width: 600px) {
       min-width: 100%;
     }
+  }
+
+  &.content-width {
+    flex: 4;
+    min-width: 448px;
+  }
+
+  &.menu-width {
+    flex: 1;
+    min-width: 112px;
   }
 `;
 
