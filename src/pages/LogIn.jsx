@@ -6,6 +6,7 @@ import AuthContext from '../context/AuthContext';
 
 import { alert } from '../utils/alert';
 import { ALERT_TYPE } from '../constants/alertConstant';
+import { theme } from '../styles/theme';
 
 //로그인 페이지지
 const LogIn = () => {
@@ -13,12 +14,14 @@ const LogIn = () => {
   const { ERROR } = ALERT_TYPE;
   const errorAlert = alert();
 
+  //이메일 비밀번호 받아오기
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   //구조분해할당으로 context를 받아옵니다.
   const { setIsLogin } = useContext(AuthContext);
-
   const navigate = useNavigate();
+
   //로그인 시도 및 사용자 정보를 context로 보냅니다.
   const loginhandler = async (e) => {
     e.preventDefault();
@@ -115,7 +118,7 @@ const LogIn = () => {
               </label>
             </div>
             <button type='submit'>로그인하기</button>
-            <button>
+            <button type='button'>
               <Link to='/signup' className='sign-up'>
                 회원가입하기
               </Link>
@@ -124,7 +127,9 @@ const LogIn = () => {
         </div>
 
         <div className='right-side'>
-          <div className='img-box'>로고 이미지</div>
+          <div className='img-box'>
+            <img src='/mm_white_logo.webp' />
+          </div>
         </div>
       </div>
     </StWrapper>
@@ -141,48 +146,75 @@ const StWrapper = styled.div`
     display: flex;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+    color: ${({ theme }) => theme.colors.primary};
   }
   .right-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid #ffaad4;
+    background-color: ${({ theme }) => theme.colors.primary};
   }
   .left-side {
     width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid #00aaff;
   }
 
   .img-box {
-    font-size: 32px;
-    font-weight: bold;
+    width: 100%;
+    height: 100%;
+  }
+  .img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .login-form {
     padding: 20px;
-    border: 2px solid black;
     display: flex;
     flex-direction: column;
     font-size: 18px;
     gap: 16px;
+    width: 60%;
   }
+  .login-form button {
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: white;
+    border-radius: 3px;
+    font-weight: bold;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .input-group label {
+    width: 100%; /* label 고정 너비 */
+    text-align: right; /* 오른쪽 정렬 */
+  }
+
   .input-group input {
+    flex: 1;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    font-size: 20px;
+    width: calc(100% - 110px); /* input이 남은 공간 채우기 */
+    box-sizing: border-box;
+    margin-left: 10px;
   }
 
   .sign-up {
     text-decoration-line: none;
+    color: white;
+    font-weight: bold;
   }
 `;
