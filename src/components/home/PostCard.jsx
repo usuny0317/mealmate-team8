@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
+import { TbBowlSpoonFilled } from 'react-icons/tb';
 function PostCard({ postData }) {
   const navigate = useNavigate();
 
@@ -12,6 +12,11 @@ function PostCard({ postData }) {
 
   const moveToDetail = (targetId) => {
     navigate(`/detail/${targetId}`);
+  };
+
+  const lastOne = (totalPeople, accPeople) => {
+    if (Number(totalPeople) - accPeople === 1)
+      return <span className='stress'>(*마지막 1명)</span>;
   };
 
   return (
@@ -41,11 +46,20 @@ function PostCard({ postData }) {
         </p>
 
         <h4>{postData.post_title}</h4>
+        <p className='context'>
+          <TbBowlSpoonFilled />
+          <span className='boldText'>{postData.post_menu}</span>
+        </p>
         <p className='context'>{postData.post_location}</p>
         <p className='context'>
           {dayjs(postData.meeting_date).format('YYYY-MM-DD HH:ss')}
         </p>
-        <p className='context'>n명/{postData.post_rec_cnt}</p>
+        <p className='context'>
+          {postData.post_rec_cnt}명 중&nbsp;
+          {postData.actions.length}
+          명이 모였어요!&nbsp;
+          {lastOne(postData.post_rec_cnt, postData.actions.length)}
+        </p>
       </div>
     </StPostCardWrapper>
   );
@@ -65,6 +79,10 @@ const StPostCardWrapper = styled.section`
   .cardContent {
     cursor: pointer;
   }
+  .stress {
+    font-weight: bold;
+    color: red;
+  }
   .context {
     margin-bottom: 10px;
     display: flex;
@@ -74,6 +92,9 @@ const StPostCardWrapper = styled.section`
     margin-right: 15px;
     border-radius: 50%;
     cursor: pointer;
+  }
+  .boldText {
+    font-weight: bold;
   }
   .postImage {
     text-align: center;

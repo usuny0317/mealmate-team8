@@ -6,10 +6,10 @@ import Empty from '../components/common/Empty';
 import PostCard from '../components/home/PostCard';
 import SearchField from '../components/home/SearchField';
 import { ALERT_TYPE } from '../constants/alertConstant';
+import AuthContext from '../context/AuthContext';
 import { supabase } from '../supabase/client';
 import { alert } from '../utils/alert';
 import { removeAllBlank } from '../utils/trimText';
-import AuthContext from '../context/AuthContext';
 const { ERROR } = ALERT_TYPE;
 
 const postsPerPage = 12; // 한 페이지 당 보일 게시글의 개수
@@ -20,7 +20,7 @@ const Home = () => {
   const [totalPosts, setTotalPosts] = useState(0); // 전체 게시글의 개수
   const [page, setPage] = useState(1); // 현재 페이지
   const [searchField, setSearchField] = useState({
-    searchCategory: '',
+    searchCategory: 'post_menu',
     searchText: '',
   }); // searchCategory : 검색 기준 (selectBox) , searchText : 검색 내용 (inputBox)
   const { isLogin } = useContext(AuthContext);
@@ -50,7 +50,7 @@ const Home = () => {
         // dateQuery : range범위의 데이터를 불러오는 api (해당 페이지에 보여질 데이터만 가져옴)
         let dataQuery = supabase
           .from('posts')
-          .select('*, users!inner(profile)')
+          .select('*, users!inner(profile),actions(*)')
           .range(startIdx, endIdx);
 
         const searchTarget = removeAllBlank(searchText); // 빈 문자열, 혹은 띄어쓰기 포함하여 검색해도 문제없도록 빈칸 제거 처리
