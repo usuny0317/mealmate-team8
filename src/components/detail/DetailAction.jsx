@@ -9,6 +9,8 @@ export const DetailAction = ({ postId }) => {
   const [liked, setLiked] = useState(false);
   const [userId, setUserId] = useState(null);
   const [limitPeople, setLimitPeople] = useState(0);
+  const [authorName, setAuthorName] = useState("");
+  const [userNickName, setUserNickName] = useState("");
 
   // 페이지 접속시 사용자 정보와 좋아요 데이터 로드
   useEffect(() => {
@@ -24,9 +26,21 @@ export const DetailAction = ({ postId }) => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw new Error(`인증 실패: ${authError?.message}`);
 
-      // 사용자 ID 설정 및 좋아요 데이터 가져오기
+      // 사용자 ID 설정
       setUserId(user.id);
-      fetchLikeData(user.id);
+
+      // 사용자 닉네임 가져오기
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("nick_name")
+        .eq("id", user.id)
+        .single();
+      if (userError) throw new Error(`닉네임 가져오기 실패: ${userError.message}`);
+
+      setUserNickName(userData.nick_name);
+
+      // 좋아요 데이터 가져오기
+      fetchLikeData(user.id, userData.nick_name);
     } catch (error) {
       console.error(`[ERROR] 사용자 정보 로딩 실패: ${error.message}`);
     }
@@ -36,7 +50,7 @@ export const DetailAction = ({ postId }) => {
   const fetchLikeData = async (currentUserId) => {
     try {
       // Supabase에서 특정 게시글의 좋아요 데이터 조회
-      const { data:likedata, error:likeerror } = await supabase
+      const { data: likedata, error: likeerror } = await supabase
         .from("actions")
         .select("*")
         .eq("post_id", postId);
@@ -47,28 +61,35 @@ export const DetailAction = ({ postId }) => {
       const userLike = likedata.some((action) => action.user_id === currentUserId);
       setLiked(userLike);
 
-      // posts 테이블에서 모집 인원 가져오기
-      const {data:postdata, error: posterror} = await supabase
+      // posts 테이블에서 모집 인원 및 작성자 닉네임 가져오기
+      const { data: postdata, error: posterror } = await supabase
         .from("posts")
-        .select("post_rec_cnt")
+        .select("post_rec_cnt, author_name")
         .eq("id", postId)
         .single();
-      if (posterror) throw new Error(`모집 인원 불러오기 실패: ${posterror.message}`);
+      if (posterror) throw new Error(`게시글 데이터 불러오기 실패: ${posterror.message}`);
 
       setLimitPeople(postdata.post_rec_cnt);
+      setAuthorName(postdata.author_name);
     } catch (error) {
       console.error(`[ERROR] fetchLikeData 실패: ${error.message}`);
     }
   };
 
-
   // 좋아요 버튼 클릭 시 이벤트 처리
   const handleLike = async () => {
-    // 좋아요 수가 모집 인원을 초과하면 경고
-    if ( likeCount >= limitPeople) {
-      alert ("최대 모집 인원을 초과했습니다.")
+    // 자신의 게시물에는 좋아요 금지
+    if (userNickName === authorName) {
+      alert("자신의 게시물에는 좋아요를 누를 수 없습니다.");
       return;
     }
+
+    // 좋아요 수가 모집 인원을 초과하면 경고
+    if (!liked && likeCount >= limitPeople) {
+      alert("최대 모집 인원을 초과했습니다.");
+      return;
+    }
+
     try {
       if (liked) {
         // 사용자가 누른 좋아요 삭제
@@ -87,33 +108,31 @@ export const DetailAction = ({ postId }) => {
         if (error) throw new Error(`좋아요 추가 실패: ${error.message}`);
       }
       // 좋아요 데이터 다시 불러오기
-      fetchLikeData(userId);
+      fetchLikeData(userId, userNickName);
     } catch (error) {
       console.error(`좋아요 실패: ${error.message}`);
     }
   };
 
-
-
   return (
-    <LikeContainer>
-      <LikeButton onClick={handleLike} $liked={liked} disabled={!userId}>
+    <StLikeContainer>
+      <StLikeButton onClick={handleLike} $liked={liked} disabled={!userId}>
         <Heart size={24} />
-      </LikeButton>
-      <LikeCount>{likeCount}</LikeCount>
-    </LikeContainer>
+      </StLikeButton>
+      <StLikeCount>{likeCount}</StLikeCount>
+    </StLikeContainer>
   );
 };
 
 // 스타일 정의
-const LikeContainer = styled.div`
+const StLikeContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 10px;
 `;
 
-const LikeButton = styled.button`
+const StLikeButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
@@ -130,7 +149,7 @@ const LikeButton = styled.button`
   }
 `;
 
-const LikeCount = styled.span`
+const StLikeCount = styled.span`
   font-size: 16px;
   color: #444;
   font-weight: bold;
