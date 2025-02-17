@@ -10,9 +10,10 @@ import { ALERT_TYPE } from '../constants/alertConstant';
 import AuthContext from '../context/AuthContext.jsx';
 
 export const Detail = () => {
-  // 게시글 데이터와 사용자 ID 상태 관리
+  // 게시글 데이터와 사용자 ID, 닉네임 상태 관리
   const [post, setPost] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userNickName, setUserNickName] = useState('');
 
   // 패스 파라미터로 postId 가져오기
   const { id: postId } = useParams();
@@ -41,23 +42,34 @@ export const Detail = () => {
   // 로그인되지 않았으면 페이지 안보여주기
   if (!isLogin) {
     return null;
-  }; 
+  }
 
-  // 현재 로그인된 사용자 ID를 가져오는 함수
+  // 🔍 로그인된 사용자 ID와 닉네임 동시 가져오기
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       try {
         const {
           data: { user },
           error,
         } = await supabase.auth.getUser();
-        if (error) throw error;
-        if (user) setUserId(user.id);
+        if (error || !user) throw new Error('사용자 인증 실패');
+
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('id, nick_name')
+          .eq('id', user.id)
+          .single();
+
+        if (userError) throw new Error('유저 데이터 가져오기 실패');
+
+        // userId와 userNickName 한 번에 설정
+        setUserId(userData.id);
+        setUserNickName(userData.nick_name);
       } catch (error) {
-        console.error('유저 인증 실패:', error);
+        console.error('유저 데이터 가져오기 실패:', error.message);
       }
     };
-    fetchUser();
+    fetchUserData();
   }, []);
 
   // 게시글 데이터 가져오기
@@ -99,14 +111,13 @@ export const Detail = () => {
 
   // 게시글 삭제 버튼 클릭 이벤트
   const handleDelete = async () => {
-    const confirmDelete = window.confirm('정말로 이 게시글을 삭제하시겠습니까?');
+    const confirmDelete = window.confirm(
+      '정말로 이 게시글을 삭제하시겠습니까?'
+    );
     if (!confirmDelete) return;
 
     try {
-      const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', postId);
+      const { error } = await supabase.from('posts').delete().eq('id', postId);
 
       if (error) throw error;
 
@@ -124,8 +135,8 @@ export const Detail = () => {
         {/* 게시글 제목 및 수정/삭제 버튼 */}
         <StTitleContainer>
           <StTitle>{post.post_title}</StTitle>
-          {/* 조건부 렌더링 (userid가 posts테이블의 userid와 같을때만 버튼 보이기!) */}
-          {userId === post.user_id && (
+          {/* 🔍 수정/삭제 버튼 - 닉네임 일치 시 표시 */}
+          {userNickName === post.author_name && (
             <StButtonContainer>
               <StEditButton onClick={handleEdit}>수정</StEditButton>
               <StDeleteButton onClick={handleDelete}>삭제</StDeleteButton>
