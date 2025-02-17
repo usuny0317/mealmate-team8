@@ -179,6 +179,7 @@ useEffect(() => {
 
         {/* 좋아요(함께해요) 버튼 */}
         {userId && <DetailAction postId={postId} userId={userId} />}
+        <StActionNotice>&nbsp; 👆🏼 함께해요 버튼을 눌러 참여 의사를 밝혀보세요!</StActionNotice>
 
         {/* 댓글 섹션 */}
         <CommentSection postId={postId} />
@@ -299,6 +300,11 @@ const StExtraInfo = styled.div`
   border-left: 4px solid #ff6b6b;
   border-radius: 4px;
   margin-top: 20px;
+`;
+
+const StActionNotice = styled.p`
+  font-size:20px;
+  
 `;
 
 export default Detail;
