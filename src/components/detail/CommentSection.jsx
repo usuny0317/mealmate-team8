@@ -13,7 +13,10 @@ export const CommentSection = ({ postId }) => {
     const fetchUser = async () => {
       try {
         // Supabase로 사용자 정보 가져오기
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error || !user) throw new Error('로그인 필요');
 
         // 가져온 사용자 ID를 상태에 저장
@@ -26,7 +29,8 @@ export const CommentSection = ({ postId }) => {
           .eq('id', user.id)
           .single();
 
-        if (userError) throw new Error(`닉네임 조회 실패: ${userError.message}`);
+        if (userError)
+          throw new Error(`닉네임 조회 실패: ${userError.message}`);
         setNickName(userInfo.nick_name);
       } catch (error) {
         console.error('유저 정보 가져오기 실패:', error.message);
@@ -74,14 +78,14 @@ export const CommentSection = ({ postId }) => {
 
     try {
       // comments 테이블에 새 댓글 삽입
-      const { error } = await supabase
-        .from('comments')
-        .insert([{ 
-          post_id: postId, 
-          user_id: userId, 
-          nick_name: nickName, 
-          content: commentText 
-        }]);
+      const { error } = await supabase.from('comments').insert([
+        {
+          post_id: postId,
+          user_id: userId,
+          nick_name: nickName,
+          content: commentText,
+        },
+      ]);
 
       if (error) throw new Error(`댓글 추가 실패: ${error.message}`);
 
@@ -121,8 +125,8 @@ export const CommentSection = ({ postId }) => {
       {/* 댓글 입력 폼 */}
       <InputContainer>
         <input
-          type="text"
-          placeholder="댓글을 입력하세요..."
+          type='text'
+          placeholder='댓글을 입력하세요...'
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           disabled={!userId}
