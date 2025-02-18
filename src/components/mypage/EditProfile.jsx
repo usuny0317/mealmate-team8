@@ -104,9 +104,6 @@ export const EditProfile = () => {
       }
     }
 
-    setImagePreview('');
-    setSelectedFile('');
-
     //페이지가 새로고침될때 세션스토리지에서 user정보를 가져오기 때문에 세션스토리지도 변경
     sessionStorage.setItem('loggedInUser', JSON.stringify(...data));
 
@@ -116,6 +113,10 @@ export const EditProfile = () => {
       type: SUCCESS,
       content: '수정이 완료 되었습니다.',
     });
+
+    setImagePreview('');
+    setSelectedFile('');
+    setUserData(upLoadData);
   };
 
   //파일 미리보기를 위한 state
