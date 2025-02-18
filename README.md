@@ -39,14 +39,12 @@
 ## 🛠 사용한 라이브러리
 - ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white) **@supabase/supabase-js** - Supabase API 연동 (데이터베이스)
 - ![Day.js](https://img.shields.io/badge/Day.js-FF4500?logo=javascript&logoColor=white) **dayjs** - 날짜 및 시간 포맷 처리
-- ![Lucide](https://img.shields.io/badge/Lucide-000000?logo=lucide&logoColor=white) **lucide-react** - React용 아이콘 라이브러리
 - ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white) **react** - React 라이브러리
 - ![React DOM](https://img.shields.io/badge/React%20DOM-61DAFB?logo=react&logoColor=white) **react-dom** - React DOM 조작
 - ![React Icons](https://img.shields.io/badge/React%20Icons-E91E63?logo=react&logoColor=white) **react-icons** - 아이콘 라이브러리
 - ![Kakao](https://img.shields.io/badge/Kakao%20Maps-FFCD00?logo=kakao&logoColor=black) **react-kakao-maps-sdk** - 카카오 지도 API
 - ![React Router](https://img.shields.io/badge/React%20Router-CA4245?logo=reactrouter&logoColor=white) **react-router-dom** - 페이지 라우팅
 - ![Styled Components](https://img.shields.io/badge/Styled%20Components-DB7093?logo=styledcomponents&logoColor=white) **styled-components** - 스타일링 라이브러리
-- ![Styled Reset](https://img.shields.io/badge/Styled%20Reset-000000?logo=css3&logoColor=white) **styled-reset** - CSS 초기화
 - ![SweetAlert2](https://img.shields.io/badge/SweetAlert2-FF2D20?logo=javascript&logoColor=white) **sweetalert2** - 팝업 알림
 
 
