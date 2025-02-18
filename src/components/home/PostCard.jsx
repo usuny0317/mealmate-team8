@@ -65,7 +65,9 @@ function PostCard({ postData }) {
           />
         </p>
 
-        <h4>{postData.post_title}</h4>
+        <h4 className={isClosedPost ? 'closed' : null}>
+          {postData.post_title}
+        </h4>
         <p className='context'>
           <TbBowlSpoonFilled />
           <span className='boldText'>{postData.post_menu}</span>
@@ -159,5 +161,8 @@ const StPostCardWrapper = styled.section`
   }
   .recruited {
     white-space: nowrap;
+  }
+  .closed {
+    opacity: 0;
   }
 `;
