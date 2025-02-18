@@ -1,8 +1,8 @@
-import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
+import { TbBowlSpoonFilled } from 'react-icons/tb';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { TbBowlSpoonFilled } from 'react-icons/tb';
+import { getFormatTime } from '../../utils/timeFormat';
 
 const EndPost = () => {
   return (
@@ -54,7 +54,7 @@ function PostCard({ postData }) {
         onClick={() => moveToDetail(postData.id)}
       >
         <p className='smallText'>
-          작성시간 : {dayjs(postData.created_at).format('YYYY-MM-DD HH:mm')}
+          작성시간 : {getFormatTime(postData.created_at)}
         </p>
         <p className={isClosedPost ? 'closedImage' : 'postImage'}>
           <img
@@ -71,9 +71,7 @@ function PostCard({ postData }) {
           <span className='boldText'>{postData.post_menu}</span>
         </p>
         <p className='context'>{postData.post_location}</p>
-        <p className='context'>
-          {dayjs(postData.meeting_date).format('YYYY-MM-DD HH:ss')}
-        </p>
+        <p className='context'>{getFormatTime(postData.meeting_date)}</p>
         <p className='context recruited'>
           {postData.post_rec_cnt}명 중&nbsp;
           {postData.actions.length}
