@@ -8,6 +8,7 @@ import { CommentSection } from '../components/detail/CommentSection';
 import { alert } from '../utils/alert.js';
 import { ALERT_TYPE } from '../constants/alertConstant';
 import AuthContext from '../context/AuthContext.jsx';
+import { getFormatDate, getFormatTime } from '../utils/timeFormat.js';
 
 export const Detail = () => {
   // 게시글 데이터와 사용자 ID, 닉네임 상태 관리
@@ -47,18 +48,20 @@ export const Detail = () => {
   // 로그인된 사용자 ID와 닉네임 동시 가져오기
   useEffect(() => {
     let isMounted = true;
-  
+
     const fetchUserData = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!isMounted) return;
-  
+
         const { data: userData } = await supabase
           .from('users')
           .select('id, nick_name')
           .eq('id', user.id)
           .single();
-  
+
         if (userData && isMounted) {
           setUserId(userData.id);
           setUserNickName(userData.nick_name);
@@ -67,41 +70,43 @@ export const Detail = () => {
         console.error('유저 데이터 가져오기 실패:', error.message);
       }
     };
-    
+
     fetchUserData();
-  
-    return () => { isMounted = false }; // 컴포넌트 언마운트 시 fetch 중단
+
+    return () => {
+      isMounted = false;
+    }; // 컴포넌트 언마운트 시 fetch 중단
   }, []);
 
   // 게시글 데이터 가져오기
   // errorAlert 함수가 alert() 함수로 매 렌더링마다 새로 생성되기 때문에 alert()를 컴포넌트 함수 바깥에 정의
-const globalAlert = alert;
+  const globalAlert = alert;
 
-useEffect(() => {
-  const fetchPost = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', postId)
-        .single();
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('id', postId)
+          .single();
 
-      if (error) {
-        globalAlert({
-          type: ALERT_TYPE.ERROR,
-          content: '게시글을 불러오는 중 오류가 발생했습니다.',
-        });
-        return;
+        if (error) {
+          globalAlert({
+            type: ALERT_TYPE.ERROR,
+            content: '게시글을 불러오는 중 오류가 발생했습니다.',
+          });
+          return;
+        }
+
+        setPost(data);
+      } catch (error) {
+        console.error('게시글 가져오기 실패:', error.message);
       }
+    };
 
-      setPost(data);
-    } catch (error) {
-      console.error('게시글 가져오기 실패:', error.message);
-    }
-  };
-
-  if (postId) fetchPost();
-}, [postId]); // 의존성 배열을 postId 하나로만 유지
+    if (postId) fetchPost();
+  }, [postId]); // 의존성 배열을 postId 하나로만 유지
 
   // 데이터 로딩 중 표시할 내용
   if (!post) {
@@ -161,7 +166,10 @@ useEffect(() => {
           </StImageContainer>
         ) : (
           <StImageContainer>
-            <img src='https://media.istockphoto.com/id/1955214946/ko/%EC%82%AC%EC%A7%84/empty-plate.jpg?s=1024x1024&w=is&k=20&c=nexrG1-O4Ba7xZHAQDZNDkAauctjAseD0BoYDJGWOJU=' alt='기본 이미지' />
+            <img
+              src='https://media.istockphoto.com/id/1955214946/ko/%EC%82%AC%EC%A7%84/empty-plate.jpg?s=1024x1024&w=is&k=20&c=nexrG1-O4Ba7xZHAQDZNDkAauctjAseD0BoYDJGWOJU='
+              alt='기본 이미지'
+            />
           </StImageContainer>
         )}
 
@@ -172,8 +180,8 @@ useEffect(() => {
         <StExtraInfo>
           <p>메뉴: {post.post_menu}</p>
           <p>위치: {post.post_location}</p>
-          <p>날짜: {dayjs(post.meeting_date).format('YYYY년 MM월 DD일')}</p>
-          <p>시간: {dayjs(post.meeting_date).format('HH시 mm분')}</p>
+          <p>날짜: {getFormatDate(post.meeting_date)}</p>
+          <p>시간: {getFormatTime(post.meeting_date)}</p>
           <p>모집 인원수: {post.post_rec_cnt}</p>
         </StExtraInfo>
 
