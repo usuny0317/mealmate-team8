@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { alert } from '../../utils/alert';
 import { ALERT_TYPE } from '../../constants/alertConstant';
 import AuthContext from '../../context/AuthContext';
@@ -37,12 +37,10 @@ export const EditProfile = () => {
 
     //업로드할 유저정보 객체 복사
     const upLoadData = { ...userData };
-
     const fetch = `public/upload/${new Date().getTime()}.webp`;
+
     //수정할 이미지가 있으면 바뀐 링크를 반영하기 위해 위에 작성
     if (imagePreview) {
-      //스토지리에서 뽑아서 사용할 링크
-
       //이미지가 저장될 버킷 저장소의 주소를 profile 에 넣어줌
       upLoadData.profile =
         'https://akqkaonphmdqozkinveg.supabase.co/storage/v1/object/public/profile-images/' +
@@ -75,10 +73,10 @@ export const EditProfile = () => {
     }
 
     if (imagePreview) {
-      //스토리지에 업로드밑 링크 받아오기
+      //스토리지에 업로드 및 링크 받아오기
       const uploadImage = await supabase.storage
         .from('profile-images')
-        .upload(fetch, selectedFile);
+        .upload(fetch, selectedFile.current);
 
       //이미지업로드실패시
       if (uploadImage?.error) {
@@ -115,21 +113,20 @@ export const EditProfile = () => {
     });
 
     setImagePreview('');
-    setSelectedFile('');
+    selectedFile.current = '';
     setUserData(upLoadData);
   };
 
   //파일 미리보기를 위한 state
   const [imagePreview, setImagePreview] = useState('');
 
-  //파일을 저장할 state
-  const [selectedFile, setSelectedFile] = useState('');
+  //들어온 파일을 저장할 ref
+  const selectedFile = useRef('');
 
   //미리보기로 보여주고 selectedFile에 선택된 파일이 들어감
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    const fileURL = URL.createObjectURL(e.target.files[0]);
-    setImagePreview(fileURL);
+    selectedFile.current = e.target.files[0];
+    setImagePreview(URL.createObjectURL(e.target.files[0]));
   };
 
   return (
