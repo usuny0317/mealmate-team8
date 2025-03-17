@@ -7,14 +7,13 @@ import { alert } from '../utils/alert';
 import { ALERT_TYPE } from '../constants/alertConstant';
 import styled from 'styled-components';
 
-//회원가입페이지지
 const Signup = () => {
-  //이미지 도전
+  // Image handling
   const fileInputRef = useRef(null);
   const [imagePreview, setImagePreview] = useState('');
   const defalt_img = '/user2.png';
-  //값 보내주고 관리하기 위한 state
-  //일단 작성하고 나중에 묶을까 생각 중입니다.
+
+  // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -22,36 +21,31 @@ const Signup = () => {
   const [main_location, setMain_location] = useState('서울특별시');
   const [sub_location, setSub_location] = useState('');
   const [profile, setProfile] = useState(null);
-
   const [check, setCheck] = useState(false);
-  //셀렉트 박스 전용
+
+  // Select options
   const mainselect = main_select;
-  //select박스에서 두번째 인자 전용입니다!
   const [get_sub, setget_sub] = useState([]);
 
-  //완료 후 로그인으로 보내 줄 navigate
   const navigate = useNavigate();
 
-  //스위트alert
+  // Alert types
   const { SUCCESS, ERROR } = ALERT_TYPE;
   const SignupAlert = alert();
 
-  //select Box useEffect
+  // Update sub-location options when main location changes
   useEffect(() => {
-    //메인 비어있을 때 업데이트 null.map 오류 나지 않게..
     if (main_location) {
       setget_sub(get_sub_select(main_location));
       setSub_location(get_sub_select(main_location)[0]);
     }
   }, [main_location]);
 
-  //닉네임 중복 핸들러
+  // Nickname duplication check
   const handleNickname = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase
-        .from('users') // 테이블 이름
-        .select('nick_name');
+      const { data, error } = await supabase.from('users').select('nick_name');
       if (error) throw error;
 
       const nickNames = data.map((item) => item.nick_name);
@@ -69,14 +63,13 @@ const Signup = () => {
     }
   };
 
-  //회원가입 핸들러
+  // Signup handler
   const handleSignup = async (e) => {
     e.preventDefault();
-    //수파 베이스 연결 시도하기기
     try {
       if (!check) throw '닉네임 중복 검사를 해주세요';
       else {
-        // 이메일 비밀번호로 회원가입!!
+        // Register with email and password
         const { data: authData, error: authErr } = await supabase.auth.signUp({
           email,
           password,
@@ -84,22 +77,16 @@ const Signup = () => {
 
         if (authErr) throw authErr;
 
-        //정보가 없는 경우도 추가했습니다.
         if (!authData || !authData.user) {
           throw new Error('회원가입 실패: 유저 정보가 없습니다.');
         }
 
-        //스토리지에 이미지 업로드
+        // Upload profile image
         let fileUrl = defalt_img;
-        console.log('', profile);
         if (profile) {
-          console.log('프로필 값은 있네용');
           const fileExtension = profile.name.split('.').pop();
-          console.log('fileEx', fileExtension);
           const filePath = `upload/${Date.now()}.${fileExtension}`;
-          console.log('filePath', filePath);
 
-          //새 이미지 업로드
           const { error } = await supabase.storage
             .from('profile-images')
             .upload(`public/${filePath}`, profile);
@@ -108,8 +95,8 @@ const Signup = () => {
         } else {
           fileUrl = defalt_img;
         }
-        console.log(fileUrl);
 
+        // Insert user data
         const { error: userErr } = await supabase.from('users').insert({
           id: authData.user.id,
           nick_name: nickname,
@@ -136,7 +123,7 @@ const Signup = () => {
     }
   };
 
-  //이미지 핸들러
+  // Image handlers
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
 
@@ -145,15 +132,12 @@ const Signup = () => {
       setImagePreview(fileURL);
       setProfile(selectedFile);
     }
-
-    //url 객체 > 스토리지 url 뽑기 > 뽑은 걸 컬럼에에
-    //스토리지 > url 가져와서 테이블에 저장
   };
 
   const handleDeletImg = (e) => {
     e.stopPropagation();
     setProfile('');
-    setImagePreview(defalt_img);
+    setImagePreview('');
   };
 
   const getImageUrl = (imageName) => {
@@ -164,166 +148,162 @@ const Signup = () => {
 
   return (
     <StWrapper>
-      <div className='img-div'>
-        <img src='/mm_logo.svg' />
-        <div className='title'>회원가입</div>
-      </div>
-
-      <div className='form-div'>
-        <form onSubmit={handleSignup}>
-          <div>
-            <label>
-              이메일:{' '}
-              <input
-                placeholder='이메일'
-                type='email'
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              비밀번호:{' '}
-              <input
-                type='password'
-                minLength={6}
-                required
-                placeholder='비밀번호'
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              닉네임:{' '}
-              <input
-                className='nickname-input'
-                required
-                placeholder='닉네임'
-                onChange={(e) => {
-                  setNickname(e.target.value);
-                }}
-              />
-              <button type='button' onClick={handleNickname}>
-                중복 검사
-              </button>
-            </label>
-          </div>
-
-          <div className='radio-select-div'>
-            <div className='left-radio-div'>
-              성별:
-              <label className='radio-label'>
-                남성
+      <div className='content-container'>
+        <div className='form-div'>
+          <form onSubmit={handleSignup}>
+            <div className='img-div'>
+              <img src='/mm_logo.svg' alt='Logo' />
+              <div className='title'>회원가입</div>
+            </div>
+            <div className='form-group'>
+              <label>
+                이메일
                 <input
-                  className='radio-input'
-                  type='radio'
-                  value={true}
-                  name='gender'
-                  defaultChecked
-                  onChange={() => {
-                    setGender(true);
+                  placeholder='이메일'
+                  type='email'
+                  onChange={(e) => {
+                    setEmail(e.target.value);
                   }}
+                  required
                 />
               </label>
-              <label className='radio-label'>
-                여성
+            </div>
+            <div className='form-group'>
+              <label>
+                비밀번호
                 <input
-                  className='radio-input'
-                  type='radio'
-                  value={false}
-                  name='gender'
-                  onChange={() => {
-                    setGender(false);
+                  type='password'
+                  minLength={6}
+                  required
+                  placeholder='비밀번호'
+                  onChange={(e) => {
+                    setPassword(e.target.value);
                   }}
                 />
               </label>
             </div>
-            <div className='right-select-div'>
-              <label className='local-label'>
-                지역:
-                <select
-                  value={main_location}
-                  className='main_location'
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    setMain_location(selectedValue);
-                  }}
-                >
-                  {mainselect.map((main) => {
-                    return (
+            <div className='form-group nickname-group'>
+              <label>
+                닉네임
+                <div className='nickname-input-container'>
+                  <input
+                    className='nickname-input'
+                    required
+                    placeholder='닉네임'
+                    onChange={(e) => {
+                      setNickname(e.target.value);
+                    }}
+                  />
+                  <button
+                    type='button'
+                    onClick={handleNickname}
+                    className='check-btn'
+                  >
+                    중복 검사
+                  </button>
+                </div>
+              </label>
+            </div>
+
+            <div className='form-group location-gender-group'>
+              <div className='gender-container'>
+                <span className='label-text'>성별</span>
+                <div className='radio-container'>
+                  <label className='radio-label'>
+                    <input
+                      className='radio-input'
+                      type='radio'
+                      value={true}
+                      name='gender'
+                      defaultChecked
+                      onChange={() => {
+                        setGender(true);
+                      }}
+                    />
+                    남성
+                  </label>
+                  <label className='radio-label'>
+                    <input
+                      className='radio-input'
+                      type='radio'
+                      value={false}
+                      name='gender'
+                      onChange={() => {
+                        setGender(false);
+                      }}
+                    />
+                    여성
+                  </label>
+                </div>
+              </div>
+
+              <div className='location-container'>
+                <span className='label-text'>지역</span>
+                <div className='select-container'>
+                  <select
+                    value={main_location}
+                    className='location-select'
+                    onChange={(e) => {
+                      const selectedValue = e.target.value;
+                      setMain_location(selectedValue);
+                    }}
+                  >
+                    {mainselect.map((main) => (
                       <option value={main} key={main}>
                         {main}
                       </option>
-                    );
-                  })}
-                </select>
-                <select
-                  value={sub_location}
-                  className='sub_location'
-                  onChange={(e) => {
-                    setSub_location(e.target.value);
-                  }}
-                >
-                  {
-                    //배열인지 확인, 배열일 때만 동작하게 && 사용.
-                    Array.isArray(get_sub) &&
-                      get_sub.map((sub) => {
-                        return (
-                          <option value={sub} key={sub}>
-                            {sub}
-                          </option>
-                        );
-                      })
-                  }
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <label className='img-upload-label'>
-            프로필:
-            <div>
-              <input
-                type='file'
-                id='inputFile'
-                accept='image/*'
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-            </div>
-            {imagePreview && (
-              <div>
-                {' '}
-                <img
-                  src={imagePreview}
-                  alt='이미지 미리보기'
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    objectFit: 'cover',
-                  }}
-                />
+                    ))}
+                  </select>
+                  <select
+                    value={sub_location}
+                    className='location-select'
+                    onChange={(e) => {
+                      setSub_location(e.target.value);
+                    }}
+                  >
+                    {Array.isArray(get_sub) &&
+                      get_sub.map((sub) => (
+                        <option value={sub} key={sub}>
+                          {sub}
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
-            )}
-            <button type='button' onClick={handleDeletImg}>
-              이미지 삭제
+            </div>
+
+            <div className='form-group profile-group'>
+              <span className='label-text'>프로필</span>
+              <div className='profile-content'>
+                <div className='file-upload-container'>
+                  <input
+                    type='file'
+                    id='inputFile'
+                    accept='image/*'
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className='file-input'
+                  />
+                  <button
+                    type='button'
+                    onClick={handleDeletImg}
+                    className='delete-img-btn'
+                  >
+                    이미지 삭제
+                  </button>
+                </div>
+                {imagePreview && (
+                  <div className='image-preview'>
+                    <img src={imagePreview} alt='이미지 미리보기' />
+                  </div>
+                )}
+              </div>
+            </div>
+            <button type='submit' className='submit-btn'>
+              가입하기
             </button>
-          </label>
-          <button
-            type='submit'
-            onClick={() => {
-              console.log('' + profile);
-            }}
-          >
-            가입하기
-          </button>
-        </form>
+          </form>
+        </div>
       </div>
     </StWrapper>
   );
@@ -333,116 +313,257 @@ export default Signup;
 
 const StWrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: auto; /* 내용이 많을 경우 스크롤 */
 
-  color: black;
+  .content-container {
+    max-width: 500px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 50px; /* 하단이 잘리지 않도록 여유 공간 */
+  }
 
-  div {
+  .img-div {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
   }
 
   img {
     width: 100px;
     height: 100px;
   }
-  .img-div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 30px;
+
+  .title {
+    margin-top: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: ${({ theme }) => theme.colors.primaryLight};
   }
 
   .form-div {
+    width: 100%;
     display: flex;
     justify-content: center;
-    width: 700px;
   }
 
   form {
-    border: 2px solid #000000;
+    width: 100%;
+    max-width: 600px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     font-size: 18px;
-    gap: 16px;
+    gap: 20px;
+    border-radius: 8px;
   }
+
+  .form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: 500;
+  }
+
   input {
-    flex: 1;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: calc(100% - 110px); /* input이 남은 공간 채우기 */
-    box-sizing: border-box;
-    margin-left: 10px;
-  }
-  form label {
     width: 100%;
-    text-align: right;
+    box-sizing: border-box;
   }
+
+  .nickname-group {
+    margin-bottom: 10px;
+  }
+
+  .nickname-input-container {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
   .nickname-input {
-    width: 60%;
-    margin-right: 11px;
+    flex: 1;
+  }
+
+  .check-btn {
+    width: 100px;
+    white-space: nowrap;
+  }
+
+  .location-gender-group {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .gender-container,
+  .location-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 50%;
+  }
+
+  .label-text {
+    font-weight: 500;
+  }
+
+  .radio-container {
+    display: flex;
+    gap: 15px;
+  }
+
+  .radio-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .radio-input {
+    width: 20px;
+    height: 20px;
+  }
+
+  .select-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  .location-select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    flex: 1;
+  }
+
+  .profile-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .file-upload-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .file-input {
+    flex: 1;
+  }
+
+  .image-preview {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .image-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .delete-img-btn {
+    white-space: nowrap;
   }
 
   button {
     background-color: ${({ theme }) => theme.colors.primaryLight};
     color: white;
-    border-radius: 3px;
+    border: none;
+    border-radius: 4px;
     font-weight: bold;
-    padding: 5px;
-    margin: 2px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
 
-  .left-radio-div {
-    width: 45%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .radio-input {
-    width: 30px;
-  }
-  .radio-label {
-    width: 30%;
-    display: flex;
-    margin-left: 5px;
-  }
-  .radio-select-div {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
+  button:hover {
+    opacity: 0.9;
   }
 
-  .right-select-div {
-    width: 55%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 3px;
-  }
-
-  select {
-    width: 100px;
-    margin-left: 10px;
-  }
-  .select-div {
-    display: flex;
-  }
-
-  .img-upload-label {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    width: 100%;
-  }
-  .title {
+  .submit-btn {
     margin-top: 10px;
+    padding: 12px;
+    font-size: 18px;
   }
-  .local-label {
-    display: flex;
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .location-gender-group {
+      flex-direction: column;
+    }
+
+    .gender-container,
+    .location-container {
+      width: 100%;
+    }
+
+    .nickname-input-container {
+      flex-direction: column;
+    }
+
+    .check-btn {
+      width: 100%;
+    }
+
+    .file-upload-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .delete-img-btn {
+      width: 100%;
+    }
+
+    form {
+      padding: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px;
+
+    .content-container {
+      width: 100%;
+    }
+
+    form {
+      border-width: 1px;
+    }
+
+    .select-container {
+      flex-direction: column;
+    }
   }
 `;
